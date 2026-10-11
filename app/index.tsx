@@ -1,4 +1,4 @@
-import { Redirect, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { MIN_PLAYERS } from '@/game/types';
@@ -6,7 +6,6 @@ import { MePage } from '@/home/MePage';
 import { PlayPage } from '@/home/PlayPage';
 import { TopicsPage } from '@/home/TopicsPage';
 import { PHASE_ROUTES, useGameStore } from '@/hooks/useGame';
-import { useSettingsStore } from '@/hooks/useSettings';
 import { useTableStore } from '@/hooks/useTable';
 import { BottomBar, useBottomBarHeight, type BottomTab } from '@/ui/BottomBar';
 import { color } from '@/ui/tokens';
@@ -26,7 +25,6 @@ const PLAY = 1;
  */
 export default function HomeScreen() {
   const router = useRouter();
-  const onboarded = useSettingsStore((s) => s.onboarded);
   const players = useTableStore((s) => s.players);
   const settings = useTableStore((s) => s.settings);
   const start = useGameStore((s) => s.start);
@@ -35,8 +33,6 @@ export default function HomeScreen() {
   const bar = useBottomBarHeight();
   const [page, setPage] = useState(PLAY);
 
-  if (!onboarded) return <Redirect href="/welcome" />;
-
   const goTo = (index: number) => {
     pager.current?.scrollTo({ x: index * width, animated: true });
     setPage(index);
@@ -44,7 +40,8 @@ export default function HomeScreen() {
 
   const play = () => {
     if (players.length < MIN_PLAYERS) {
-      router.push('/new/players');
+      // Straight into the game once the names are in, not back here.
+      router.push({ pathname: '/new/players', params: { start: '1' } });
       return;
     }
     const begin = () => {
@@ -90,7 +87,6 @@ export default function HomeScreen() {
           onResume={resume}
           onPlayers={() => router.push('/new/players')}
           onRules={() => router.push('/new/rules')}
-          onTopics={() => goTo(0)}
           onHelp={() => router.push('/welcome?replay=1')}
         />
         <MePage

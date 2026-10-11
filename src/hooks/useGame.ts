@@ -5,7 +5,6 @@ import {
   beginRound,
   castVote,
   clearVotes,
-  currentRound,
   finishFromVote,
   finishWithGuess,
   latestRound,
@@ -23,40 +22,38 @@ import { allTopics } from './useTopics';
  * The game in progress.
  *
  * The round moves through phases, one screen each:
- *   deal → clues → talk → vote → reveal → guess → verdict → recap
- * (talk is skipped when the timer is off; reveal and guess only happen when
- * someone was voted out). The phase and its progress are saved with the
- * session at every step, so a phone that dies mid-round, or an app swiped
- * away, picks up on the same screen.
+ *   deal → vote → reveal → guess → verdict → recap
+ * Clues and talking happen out loud at the end of the deal, on one screen,
+ * with nothing to tap; reveal and guess only happen when someone was voted
+ * out. The phase and its progress are saved with the session at every step,
+ * so a phone that dies mid-round, or an app swiped away, picks up on the same
+ * screen.
  */
 
-export type Phase = 'deal' | 'clues' | 'talk' | 'vote' | 'reveal' | 'guess' | 'verdict' | 'recap';
+export type Phase = 'deal' | 'vote' | 'reveal' | 'guess' | 'verdict' | 'recap';
 
-const PHASES: readonly Phase[] = ['deal', 'clues', 'talk', 'vote', 'reveal', 'guess', 'verdict', 'recap'];
+const PHASES: readonly Phase[] = ['deal', 'vote', 'reveal', 'guess', 'verdict', 'recap'];
+
+/** Phases from before clues and talk folded into the deal. A game saved in one resumes at the clues. */
+const OLD_PHASES = ['clues', 'talk'];
 
 export type Progress = {
   phase: Phase;
-  /** Deal: whose turn it is to peek, by seat. */
+  /** Deal: whose turn it is to peek, by seat. Past the last seat, everyone has seen theirs. */
   dealIndex: number;
-  /** Clues: how many clues have been given this round. */
-  clueStep: number;
   /** Secret vote: whose turn it is to vote, by seat. */
   voterIndex: number;
   /** Secret vote: who can be voted for. All players, or the tied ones on a revote. */
   candidates: string[] | null;
   revote: boolean;
-  /** Talk: when the timer runs out, as epoch ms. */
-  talkEndsAt: number | null;
 };
 
 const START: Progress = {
   phase: 'deal',
   dealIndex: 0,
-  clueStep: 0,
   voterIndex: 0,
   candidates: null,
   revote: false,
-  talkEndsAt: null,
 };
 
 type GameStore = Progress & {
@@ -74,10 +71,6 @@ type GameStore = Progress & {
   advanceDeal(): void;
   /** Jumps the phone to a player, for a second look. */
   setDealIndex(index: number): void;
-  /** The next clue. Returns false when every clue has been given. */
-  advanceClue(): boolean;
-  startTalk(seconds: number): void;
-  extendTalk(seconds: number): void;
 
   vote(voterId: string, suspectId: string): void;
   nextVoter(): void;
@@ -99,15 +92,14 @@ function parse(raw: unknown): Saved | null {
   const session = parseSession(v.session);
   if (!session) return null;
   const num = (x: unknown) => (typeof x === 'number' && Number.isFinite(x) && x >= 0 ? Math.floor(x) : 0);
+  const old = OLD_PHASES.includes(v.phase as string);
   return {
     session,
     phase: PHASES.includes(v.phase as Phase) ? (v.phase as Phase) : 'deal',
-    dealIndex: num(v.dealIndex),
-    clueStep: num(v.clueStep),
+    dealIndex: old ? session.players.length : num(v.dealIndex),
     voterIndex: num(v.voterIndex),
     candidates: Array.isArray(v.candidates) ? v.candidates.filter((c): c is string => typeof c === 'string') : null,
     revote: v.revote === true,
-    talkEndsAt: typeof v.talkEndsAt === 'number' ? v.talkEndsAt : null,
   };
 }
 
@@ -117,12 +109,12 @@ export const useGameStore = create<GameStore>((set, get) => {
   const saved = loadJSON<Saved | null>(STORAGE_KEY, parse, null);
 
   const persist = () => {
-    const { session, phase, dealIndex, clueStep, voterIndex, candidates, revote, talkEndsAt } = get();
+    const { session, phase, dealIndex, voterIndex, candidates, revote } = get();
     if (!session) {
       removeKey(STORAGE_KEY);
       return;
     }
-    saveJSON(STORAGE_KEY, { session, phase, dealIndex, clueStep, voterIndex, candidates, revote, talkEndsAt });
+    saveJSON(STORAGE_KEY, { session, phase, dealIndex, voterIndex, candidates, revote });
   };
 
   const commit = (patch: Partial<GameStore>) => {
@@ -170,25 +162,6 @@ export const useGameStore = create<GameStore>((set, get) => {
 
     setDealIndex(index) {
       commit({ dealIndex: Math.max(0, index) });
-    },
-
-    advanceClue() {
-      const session = get().session;
-      const round = session ? currentRound(session) : null;
-      if (!session || !round) return false;
-      const total = round.order.length * session.settings.clueRounds;
-      const next = get().clueStep + 1;
-      commit({ clueStep: Math.min(next, total) });
-      return next < total;
-    },
-
-    startTalk(seconds) {
-      commit({ phase: 'talk', talkEndsAt: Date.now() + seconds * 1000 });
-    },
-
-    extendTalk(seconds) {
-      const end = Math.max(get().talkEndsAt ?? Date.now(), Date.now());
-      commit({ talkEndsAt: end + seconds * 1000 });
     },
 
     vote(voterId, suspectId) {
@@ -249,10 +222,8 @@ export function useRound(): Round | null {
 }
 
 /** The route for each phase. */
-export const PHASE_ROUTES: Record<Phase, '/round/deal' | '/round/clues' | '/round/talk' | '/round/vote' | '/round/reveal' | '/round/guess' | '/round/verdict' | '/round/recap'> = {
+export const PHASE_ROUTES: Record<Phase, '/round/deal' | '/round/vote' | '/round/reveal' | '/round/guess' | '/round/verdict' | '/round/recap'> = {
   deal: '/round/deal',
-  clues: '/round/clues',
-  talk: '/round/talk',
   vote: '/round/vote',
   reveal: '/round/reveal',
   guess: '/round/guess',

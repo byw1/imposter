@@ -10,6 +10,8 @@ export type HoldToRevealProps = {
   onReveal: () => void;
   onHide: () => void;
   label?: string;
+  /** What the pill says while the card is face up. */
+  openLabel?: string;
   holdMs?: number;
   style?: StyleProp<ViewStyle>;
 };
@@ -26,7 +28,7 @@ type Phase = 'rest' | 'holding' | 'open';
  * full is the same for every role. Under reduced motion the fill still runs,
  * because it is a timer, not decoration.
  */
-export function HoldToReveal({ onReveal, onHide, label = 'Hold to peek', holdMs: duration = holdMs, style }: HoldToRevealProps) {
+export function HoldToReveal({ onReveal, onHide, label = 'Hold to peek', openLabel = 'Let go to hide', holdMs: duration = holdMs, style }: HoldToRevealProps) {
   const haptics = useHaptics();
   const reduced = useReducedMotion();
   const [progress] = useState(() => new Animated.Value(0));
@@ -83,7 +85,7 @@ export function HoldToReveal({ onReveal, onHide, label = 'Hold to peek', holdMs:
     animation.current.start();
   };
 
-  const text = phase === 'open' ? 'Let go to hide' : phase === 'holding' ? 'Keep holding' : label;
+  const text = phase === 'open' ? openLabel : phase === 'holding' ? 'Keep holding' : label;
   const content = (ink: string) => (
     <View style={styles.content}>
       <Icon name="hand" size={20} color={ink} />

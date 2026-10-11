@@ -15,9 +15,13 @@ import { VerdictFlash } from '@/ui/VerdictFlash';
 
 /**
  * The verdict owns the screen: blue if the table caught the imposter, red if
- * the imposter got away or stole the word. It holds for a beat, then a tap
- * goes on to the recap and the secret word.
+ * the imposter got away or stole the word. It holds for a beat, then moves on
+ * to the recap and the secret word by itself; a tap after the beat skips the
+ * wait.
  */
+
+/** How long the verdict stays up after it can be tapped away, before moving on alone. */
+const LINGER_MS = 2200;
 export default function VerdictScreen() {
   useKeepAwake();
   const router = useRouter();
@@ -41,6 +45,15 @@ export default function VerdictScreen() {
     const id = setTimeout(() => setReady(true), verdictMs);
     return () => clearTimeout(id);
   }, [haptics, outcome, sound]);
+
+  useEffect(() => {
+    if (!ready) return;
+    const id = setTimeout(() => {
+      go('recap');
+      router.replace(PHASE_ROUTES.recap);
+    }, LINGER_MS);
+    return () => clearTimeout(id);
+  }, [go, ready, router]);
 
   if (!session || !round || !outcome) return <Redirect href="/" />;
 

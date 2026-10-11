@@ -1,7 +1,7 @@
 import { useKeepAwake } from 'expo-keep-awake';
 import { Redirect, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { Animated, Pressable, ScrollView, StyleSheet, Text as RNText, View } from 'react-native';
+import { Animated, ScrollView, StyleSheet, Text as RNText, View } from 'react-native';
 import { playerById } from '@/game/deal';
 import { currentRound } from '@/game/session';
 import type { Player } from '@/game/types';
@@ -26,8 +26,9 @@ const GAP = 10;
 /**
  * The vote. Two ways, from the house rules:
  *
- * Point: everyone points on three, and the host taps whoever got the most
- * fingers. Fast, loud, and most tables' favourite.
+ * Point: the count starts as soon as the screen opens, everyone points on
+ * three, and the host taps whoever got the most fingers. Fast, loud, and most
+ * tables' favourite.
  *
  * Secret: the phone goes round and each player votes alone. Then the votes
  * are counted out one dot at a time. A tie goes to a revote between the tied
@@ -76,7 +77,8 @@ function PointVote() {
   const sound = useSounds();
   const reduced = useReducedMotion();
   const lock = useAccuse();
-  const [stage, setStage] = useState<'ready' | 'count' | 'pick'>('ready');
+  // Tapping Vote was the cue, so the count starts straight away.
+  const [stage, setStage] = useState<'count' | 'pick'>('count');
   const [count, setCount] = useState(3);
   const [picked, setPicked] = useState<string | null>(null);
   const [pop] = useState(() => new Animated.Value(1));
@@ -115,68 +117,41 @@ function PointVote() {
     Animated.spring(pop, { toValue: 1, friction: 4, tension: 200, useNativeDriver: true }).start();
   }, [count, pop, reduced, stage]);
 
-  if (stage === 'ready' || stage === 'count') {
+  if (stage === 'count') {
     return (
       <>
-        <Pressable
-          style={styles.center}
-          disabled={stage === 'count'}
-          onPress={countIn}
-          accessibilityRole="button"
-          accessibilityLabel="Count us in"
-        >
-          {stage === 'ready' ? (
-            <>
-              <PopIn>
-                <View style={styles.tiltLeft}>
-                  <Mascot size={150} mood="gasp" />
-                </View>
-              </PopIn>
-              <Text variant="hero" align="center">
-                Who’s lying?
-              </Text>
-              <Text variant="body" tone="muted" align="center">
-                On three, everyone points at who they think the imposter is. No changing your mind.
-              </Text>
-            </>
-          ) : (
-            <View style={styles.countWrap}>
-              <Text variant="overline" tone="muted" align="center">
-                {count > 0 ? 'POINT AT THE IMPOSTER IN' : 'EVERYONE'}
-              </Text>
-              <Animated.View
-                style={[
-                  styles.ring,
-                  count <= 0 && styles.ringGo,
-                  {
-                    transform: [
-                      { scale: pop.interpolate({ inputRange: [0, 1], outputRange: [1.4, 1] }) },
-                      { rotate: count <= 0 ? '-6deg' : '0deg' },
-                    ],
-                  },
-                ]}
+        <View style={styles.center}>
+          <View style={styles.countWrap}>
+            <Text variant="overline" tone="muted" align="center">
+              {count > 0 ? 'POINT AT THE IMPOSTER IN' : 'EVERYONE'}
+            </Text>
+            <Animated.View
+              style={[
+                styles.ring,
+                count <= 0 && styles.ringGo,
+                {
+                  transform: [
+                    { scale: pop.interpolate({ inputRange: [0, 1], outputRange: [1.4, 1] }) },
+                    { rotate: count <= 0 ? '-6deg' : '0deg' },
+                  ],
+                },
+              ]}
+            >
+              <RNText
+                style={[styles.count, count <= 0 && styles.countGo]}
+                allowFontScaling={false}
+                accessibilityLiveRegion="assertive"
+                numberOfLines={1}
               >
-                <RNText
-                  style={[styles.count, count <= 0 && styles.countGo]}
-                  allowFontScaling={false}
-                  accessibilityLiveRegion="assertive"
-                  numberOfLines={1}
-                >
-                  {count > 0 ? count : 'Point!'}
-                </RNText>
-              </Animated.View>
-            </View>
-          )}
-        </Pressable>
+                {count > 0 ? count : 'Point!'}
+              </RNText>
+            </Animated.View>
+            <Text variant="body" tone="muted" align="center">
+              No changing your mind.
+            </Text>
+          </View>
+        </View>
         <View style={styles.footer}>
-          <Button
-            label={stage === 'count' ? 'Get ready…' : 'Count us in'}
-            icon="hand"
-            variant="primary"
-            size="lg"
-            disabled={stage === 'count'}
-            onPress={countIn}
-          />
           <Button label="Skip the count" variant="ghost" size="sm" onPress={() => setStage('pick')} />
         </View>
       </>
@@ -212,8 +187,8 @@ function PointVote() {
       </ScrollView>
       <View style={styles.footer}>
         <Button
-          label="Lock vote"
-          icon="lock"
+          label={picked ? `Reveal ${session.players.find((p) => p.id === picked)?.name ?? ''}` : 'Tap who got the most'}
+          icon="eye"
           variant="primary"
           size="lg"
           disabled={!picked}

@@ -118,7 +118,7 @@ export default function RulesScreen() {
             ))}
           </View>
           <Text variant="caption" tone="muted" style={styles.note}>
-            Time to argue before the vote. No timer goes straight to the vote.
+            An optional timer for the arguing, started with a tap once the clues are done.
           </Text>
         </View>
 

@@ -1,13 +1,13 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text as RNText, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { clampImposters, eligibleTopics, maxImposters } from '@/game/deal';
+import { maxImposters } from '@/game/deal';
 import { latestRound } from '@/game/session';
 import { MIN_PLAYERS } from '@/game/types';
 import { useGameStore } from '@/hooks/useGame';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { useSettingsStore } from '@/hooks/useSettings';
 import { useTableStore } from '@/hooks/useTable';
-import { useAllTopics } from '@/hooks/useTopics';
 import { Avatar } from '@/ui/Avatar';
 import { Button } from '@/ui/Button';
 import { CensorField } from '@/ui/CensorField';
@@ -27,7 +27,6 @@ export type PlayPageProps = {
   onResume: () => void;
   onPlayers: () => void;
   onRules: () => void;
-  onTopics: () => void;
   onHelp: () => void;
 };
 
@@ -36,18 +35,18 @@ const HIDDEN = ['lying', 'bluffing', 'faking it', 'sweating', 'clueless'] as con
 
 /**
  * Play: the front door. Dark and hushed, a redacted page drifting behind,
- * Shade smirking in the middle, and one lime button. Who's at the table, the
- * house rules and the topics sit underneath as summaries you tap to change,
- * so the same friends can start again with one tap.
+ * Shade smirking in the middle, and one lime button. Who's at the table sits
+ * underneath, so the same friends can start again with one tap. The house
+ * rules have good defaults and live behind the gear, out of the way.
  */
-export function PlayPage({ bottomInset, onPlay, onResume, onPlayers, onRules, onTopics, onHelp }: PlayPageProps) {
+export function PlayPage({ bottomInset, onPlay, onResume, onPlayers, onRules, onHelp }: PlayPageProps) {
   const { width, height, short } = useLayout();
   const insets = useSafeAreaInsets();
   const reduced = useReducedMotion();
   const players = useTableStore((s) => s.players);
   const settings = useTableStore((s) => s.settings);
-  const topics = useAllTopics();
   const session = useGameStore((s) => s.session);
+  const onboarded = useSettingsStore((s) => s.onboarded);
 
   // The headline's censor bar lifts for a moment, then covers a new word.
   const [open, setOpen] = useState(false);
@@ -74,10 +73,7 @@ export function PlayPage({ bottomInset, onPlay, onResume, onPlayers, onRules, on
     };
   }, [reduced]);
 
-  const chosen = useMemo(() => eligibleTopics(topics, settings), [topics, settings]);
-  const allTopics = settings.topicIds.length === 0 || chosen.length === topics.length;
   const ready = players.length >= MIN_PLAYERS;
-  const imposters = clampImposters(settings.imposters, Math.max(MIN_PLAYERS, players.length));
   const inProgress = Boolean(session && latestRound(session));
 
   return (
@@ -134,6 +130,12 @@ export function PlayPage({ bottomInset, onPlay, onResume, onPlayers, onRules, on
           <Text variant="body" tone="muted" align="center">
             Everyone gets the secret word. Except the imposter.
           </Text>
+          {!onboarded ? (
+            <Tap onPress={onHelp} squish={0.96} accessibilityLabel="New here? How to play" contentStyle={styles.learn}>
+              <Text style={styles.learnText}>New here? How to play</Text>
+              <Icon name="forward" size={16} color={color.brandText} />
+            </Tap>
+          ) : null}
         </View>
 
         <Tap onPress={onPlayers} squish={0.98} accessibilityLabel={`Players: ${players.length}. Edit.`} contentStyle={styles.card}>
@@ -162,25 +164,6 @@ export function PlayPage({ bottomInset, onPlay, onResume, onPlayers, onRules, on
           )}
         </Tap>
 
-        <View style={styles.summary}>
-          <Summary
-            emoji="🎭"
-            label={imposters === 'surprise' ? 'Surprise' : `${imposters} ${imposters === 1 ? 'imposter' : 'imposters'}`}
-            onPress={onRules}
-          />
-          <Summary emoji={settings.hint ? '💡' : '🙈'} label={settings.hint ? 'Hint on' : 'No hint'} onPress={onRules} />
-          <Summary
-            emoji="⏱️"
-            label={settings.talkSeconds ? `${settings.talkSeconds}s talk` : 'No timer'}
-            onPress={onRules}
-          />
-          <Summary emoji={settings.voteMode === 'secret' ? '🤫' : '👉'} label={settings.voteMode === 'secret' ? 'Secret vote' : 'Point vote'} onPress={onRules} />
-          <Summary
-            emoji={allTopics ? '🎲' : (chosen[0]?.emoji ?? '🎲')}
-            label={allTopics ? 'All topics' : chosen.length === 1 ? chosen[0]!.name : `${chosen.length} topics`}
-            onPress={onTopics}
-          />
-        </View>
         {players.length > 0 && players.length < 5 && settings.imposters !== 'surprise' && settings.imposters > maxImposters(players.length) ? (
           <Text variant="caption" tone="muted" align="center">
             {players.length} players can have 1 imposter. Add more for a second.
@@ -202,19 +185,6 @@ export function PlayPage({ bottomInset, onPlay, onResume, onPlayers, onRules, on
   );
 }
 
-function Summary({ emoji, label, onPress }: { emoji: string; label: string; onPress: () => void }) {
-  return (
-    <Tap onPress={onPress} squish={0.94} accessibilityLabel={label} contentStyle={styles.pill}>
-      <RNText style={styles.pillEmoji} allowFontScaling={false}>
-        {emoji}
-      </RNText>
-      <Text style={styles.pillText} numberOfLines={1}>
-        {label}
-      </Text>
-    </Tap>
-  );
-}
-
 const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: color.background },
   top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
@@ -233,18 +203,8 @@ const styles = StyleSheet.create({
   avatars: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   avatarSpot: { width: 56, alignItems: 'center', gap: 4 },
   avatarName: { maxWidth: 56 },
-  summary: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, justifyContent: 'center' },
-  pill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    minHeight: 40,
-    paddingHorizontal: 14,
-    borderRadius: radius.pill,
-    backgroundColor: color.glass,
-  },
-  pillEmoji: { fontSize: 16, lineHeight: 20 },
-  pillText: { fontFamily: font.heavy, fontSize: 14, lineHeight: 18, color: color.text },
+  learn: { alignSelf: 'center', flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: space.xs },
+  learnText: { fontFamily: font.heavy, fontSize: 15, lineHeight: 20, color: color.brandText },
   footer: { paddingTop: space.sm },
   banner: {
     flexDirection: 'row',
