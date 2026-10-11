@@ -1,0 +1,93 @@
+import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { Tap } from './Tap';
+import { Text } from './Text';
+import { color, font, minTapTarget, radius, space } from './tokens';
+
+export type ChipProps = {
+  label: string;
+  selected: boolean;
+  onPress: () => void;
+  accessibilityLabel?: string;
+  /** radio for one-of-many, checkbox for many-of-many. */
+  role?: 'radio' | 'checkbox';
+  /** A leading emoji. Colourful on iOS, which is the point. */
+  emoji?: string;
+  /** Second line under the label, for choices that need a word of explanation. */
+  detail?: string;
+  /** Stretch to share a row equally with its siblings. */
+  grow?: boolean;
+  /** Extra layout for the chip in its row, such as a minimum width. */
+  style?: StyleProp<ViewStyle>;
+};
+
+/**
+ * A choice. Selected flips to solid text colour with canvas-coloured ink, so
+ * the pick is obvious at a glance. Unchanged from Charades.
+ */
+export function Chip({
+  label,
+  selected,
+  onPress,
+  accessibilityLabel,
+  role = 'radio',
+  emoji,
+  detail,
+  grow = false,
+  style,
+}: ChipProps) {
+  const tall = Boolean(detail);
+  // Selected fills with the text colour: white on the dark theme, ink on the
+  // light one, so the pick stands out on either.
+  const face = selected ? color.text : color.surface;
+  const ink = selected ? color.background : color.text;
+
+  return (
+    <Tap
+      onPress={onPress}
+      accessibilityRole={role}
+      accessibilityState={role === 'radio' ? { selected } : { checked: selected }}
+      accessibilityLabel={accessibilityLabel ?? label}
+      style={[grow ? styles.grow : null, style]}
+      contentStyle={[
+        styles.face,
+        tall ? styles.faceTall : styles.facePill,
+        { backgroundColor: face },
+        grow && styles.fill,
+      ]}
+    >
+      <View style={styles.row}>
+        {emoji ? <Text style={styles.emoji}>{emoji}</Text> : null}
+        <Text style={[styles.label, { color: ink }]} numberOfLines={1}>
+          {label}
+        </Text>
+      </View>
+      {detail ? (
+        <Text
+          variant="caption"
+          align="center"
+          numberOfLines={2}
+          style={{ color: selected ? ink : color.textMuted, opacity: selected ? 0.7 : 1 }}
+        >
+          {detail}
+        </Text>
+      ) : null}
+    </Tap>
+  );
+}
+
+const styles = StyleSheet.create({
+  grow: { flex: 1 },
+  fill: { flexGrow: 1 },
+  face: {
+    minHeight: minTapTarget,
+    minWidth: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: space.md,
+  },
+  facePill: { borderRadius: radius.pill, paddingVertical: space.sm },
+  faceTall: { borderRadius: radius.md, paddingVertical: space.md - 2, gap: 2 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  label: { fontFamily: font.heavy, fontSize: 15, lineHeight: 20 },
+  emoji: { fontSize: 18, lineHeight: 24 },
+});

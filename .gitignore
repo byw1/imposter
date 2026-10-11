@@ -1,0 +1,65 @@
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files
+.env*.local
+
+# typescript
+*.tsbuildinfo
+
+# generated native folders
+/ios
+/android
+
+# Brand assets. Reserved brand property, not covered by any code licence.
+# The exported PNGs in /assets are committed because the app will not build
+# without them. The editable sources and store artwork stay out.
+/brand/
+*.sketch
+*.fig
+*.afdesign
+*.afphoto
+*.ai
+*.psd
+/assets/icon-source.*
+/assets/wordmark.*
+/store/
+/screenshots/
+
+# EAS local build artefacts and credentials
+/build/
+*.ipa
+*.aab
+*.apk
+credentials.json
+google-services.json
+GoogleService-Info.plist
