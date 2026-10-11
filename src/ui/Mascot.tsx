@@ -32,12 +32,12 @@ const SHADES_PIVOT = { x: 60 + 6, y: 80 + 6 };
 /** How far the shades sit down the nose, in art units, and how crooked. */
 const SHADES: Record<MascotMood, { drop: number; tilt: number } | null> = {
   smirk: { drop: 0, tilt: 0 },
-  peek: { drop: 9, tilt: 0 },
+  peek: { drop: 4, tilt: 0 },
   excited: { drop: 0, tilt: 0 },
   gasp: { drop: 0, tilt: -3 },
-  caught: { drop: 12, tilt: -16 },
+  caught: { drop: 5, tilt: -10 },
   sleepy: null,
-  wink: { drop: 9, tilt: 0 },
+  wink: { drop: 4, tilt: 0 },
 };
 
 /**
@@ -316,43 +316,61 @@ function Snooze({ size }: { size: number }) {
 
 const line = { stroke: INK, strokeWidth: 4, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, fill: 'none' };
 
+/** Where the shades' top rim sits, and the middle of each lens, in art units. */
+const RIM = 73;
+const LENS = { left: 42.5, right: 77.5 } as const;
+
 /**
- * Eyes only show when the shades are down the nose: on a peek, a wink, when
- * caught, and asleep. A smirking Shade's eyes are hidden, which is the point.
+ * Shade's eyes live behind the shades. They only show when the shades slip a
+ * little way down the nose: then the top half of each eye peeks over the rim,
+ * the rest hidden behind the lenses, which are drawn on top. Asleep, the shades
+ * are off and the eyes are closed.
  */
 function Eyes({ mood, look }: { mood: MascotMood; look: number }) {
-  const eye = (cx: number, cy: number) => (
+  const drop = SHADES[mood]?.drop ?? 0;
+  const rim = RIM + drop;
+
+  // An ink eye centred on the rim, so only its top half shows, with a glint.
+  const peeper = (cx: number, cy: number) => (
     <G key={cx}>
-      <Ellipse cx={cx} cy={cy} rx={5.5} ry={6.5} fill={INK} />
-      <Circle cx={cx + 1.8} cy={cy - 2.5} r={2} fill="#FFFFFF" />
+      <Ellipse cx={cx} cy={cy + 0.5} rx={5.4} ry={6.4} fill={INK} />
+      <Circle cx={cx + 1.6} cy={cy - 2.8} r={1.8} fill="#FFFFFF" />
     </G>
   );
 
   switch (mood) {
     case 'peek': {
-      // Darting sideways, mostly toward whoever is talking.
-      const dx = look === 0 ? 3.5 : look * 3.5;
+      // Darting sideways, toward whoever is talking.
+      const dx = (look === 0 ? 1 : look) * 2.6;
       return (
         <G>
-          {eye(44 + dx, 72)}
-          {eye(76 + dx, 72)}
+          {peeper(LENS.left + dx, rim)}
+          {peeper(LENS.right + dx, rim)}
         </G>
       );
     }
     case 'wink':
       return (
         <G>
-          {eye(44, 72)}
-          <Path d="M70 73 Q76 67 82 73" {...line} />
+          {peeper(LENS.left, rim)}
+          <Path d={`M${LENS.right - 6} ${rim - 0.5} Q${LENS.right} ${rim - 6} ${LENS.right + 6} ${rim - 0.5}`} {...line} strokeWidth={3.5} />
         </G>
       );
-    case 'caught':
+    case 'caught': {
+      // Wide-eyed over shades knocked crooked: the left lens has dropped, the right has risen.
+      const eye = (cx: number, cy: number) => (
+        <G key={cx}>
+          <Circle cx={cx} cy={cy} r={6} fill="#FFFFFF" stroke={INK} strokeWidth={2.2} />
+          <Circle cx={cx + 0.6} cy={cy - 0.8} r={2.6} fill={INK} />
+        </G>
+      );
       return (
         <G>
-          {eye(44, 74)}
-          {eye(76, 74)}
+          {eye(LENS.left, rim + 1)}
+          {eye(LENS.right, rim - 5)}
         </G>
       );
+    }
     case 'sleepy':
       return <Path d="M37 82 Q44 87 51 82 M69 82 Q76 87 83 82" {...line} />;
     default:
