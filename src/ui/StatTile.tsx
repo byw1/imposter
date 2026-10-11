@@ -33,5 +33,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.md - 4,
     gap: 2,
   },
-  value: { fontFamily: font.display, fontSize: 28, lineHeight: 32 },
+  value: { fontFamily: font.display, fontSize: 28, lineHeight: 33 },
 });

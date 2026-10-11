@@ -62,7 +62,7 @@ export function VerdictFlash({ outcome, line }: VerdictFlashProps) {
         <Text style={styles.emoji} allowFontScaling={false}>
           {verdict.emoji}
         </Text>
-        <Text style={[styles.word, { fontSize: size, lineHeight: size * 1.04 }]} allowFontScaling={false} numberOfLines={1}>
+        <Text style={[styles.word, { fontSize: size, lineHeight: size * 1.12 }]} allowFontScaling={false} numberOfLines={1}>
           {verdict.word}
         </Text>
         <Text style={styles.line} allowFontScaling={false} numberOfLines={2}>
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
   blobOne: { width: 420, height: 420, top: -160, left: -160 },
   blobTwo: { width: 360, height: 360, bottom: -140, right: -140 },
   emoji: { fontSize: 64, lineHeight: 76 },
-  word: { fontFamily: font.display, fontSize: 112, lineHeight: 116, letterSpacing: -3, color: color.ink, textAlign: 'center' },
+  word: { fontFamily: font.display, fontSize: 112, lineHeight: 126, letterSpacing: -3, color: color.ink, textAlign: 'center' },
   line: { fontFamily: font.heavy, fontSize: 26, lineHeight: 32, color: color.ink, textAlign: 'center', marginTop: 8 },
   shade: { position: 'absolute', bottom: 24, left: 16 },
 });

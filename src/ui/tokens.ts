@@ -171,10 +171,10 @@ export const font = {
 } as const;
 
 export const type = {
-  hero: { fontFamily: font.display, fontSize: 44, lineHeight: 46, letterSpacing: -1.2 },
-  display: { fontFamily: font.display, fontSize: 32, lineHeight: 36, letterSpacing: -0.8 },
-  title: { fontFamily: font.display, fontSize: 24, lineHeight: 28, letterSpacing: -0.4 },
-  stat: { fontFamily: font.display, fontSize: 28, lineHeight: 32 },
+  hero: { fontFamily: font.display, fontSize: 44, lineHeight: 50, letterSpacing: -1.2 },
+  display: { fontFamily: font.display, fontSize: 32, lineHeight: 37, letterSpacing: -0.8 },
+  title: { fontFamily: font.display, fontSize: 24, lineHeight: 29, letterSpacing: -0.4 },
+  stat: { fontFamily: font.display, fontSize: 28, lineHeight: 33 },
   heading: { fontFamily: font.bold, fontSize: 17, lineHeight: 22 },
   body: { fontFamily: font.regular, fontSize: 16, lineHeight: 22 },
   label: { fontFamily: font.bold, fontSize: 15, lineHeight: 20 },

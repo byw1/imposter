@@ -164,8 +164,8 @@ const styles = StyleSheet.create({
   stage: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: gutter, gap: space.sm },
   speaker: { marginBottom: space.md },
   speakerShort: { marginBottom: 0 },
-  prompt: { fontFamily: font.display, fontSize: 44, lineHeight: 48, letterSpacing: -1.2, color: color.text },
-  promptShort: { fontSize: 32, lineHeight: 36 },
+  prompt: { fontFamily: font.display, fontSize: 44, lineHeight: 50, letterSpacing: -1.2, color: color.text },
+  promptShort: { fontSize: 32, lineHeight: 37 },
   tip: {
     marginTop: space.md,
     paddingHorizontal: space.md,
