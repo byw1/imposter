@@ -14,8 +14,9 @@
   "submit": {
     "production": {
       "ios": {
-        "appName": "Imposter",
-        "language": "en-US"
+        "appName": "Imposter: Game Night",
+        "language": "en-US",
+        "ascAppId": "6821578816"
       }
     }
   }
