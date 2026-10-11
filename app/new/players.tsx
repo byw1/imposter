@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { nameProblem } from '@/game/players';
 import { MAX_NAME_LENGTH, MAX_PLAYERS, MIN_PLAYERS } from '@/game/types';
 import { useHaptics } from '@/hooks/useHaptics';
@@ -43,8 +43,13 @@ export default function PlayersScreen() {
 
   const submit = () => {
     const issue = nameProblem(draft, players);
+    // The keyboard's done key on an empty field means "that's everyone".
+    if (issue === 'empty') {
+      Keyboard.dismiss();
+      return;
+    }
     if (issue) {
-      if (issue !== 'empty') setProblem(PROBLEMS[issue]);
+      setProblem(PROBLEMS[issue]);
       return;
     }
     add(draft);
@@ -66,7 +71,15 @@ export default function PlayersScreen() {
       { text: 'Remove', style: 'destructive', onPress: () => remove(id) },
     ]);
 
-  const short = MIN_PLAYERS - players.length;
+  // A name still in the box counts: typing the last name and tapping Done adds it.
+  const pending = draft.trim() && !nameProblem(draft, players) ? 1 : 0;
+  const short = MIN_PLAYERS - players.length - pending;
+
+  const finish = () => {
+    if (pending) add(draft);
+    Keyboard.dismiss();
+    router.back();
+  };
 
   return (
     <Screen>
@@ -76,6 +89,7 @@ export default function PlayersScreen() {
           subtitle={`${MIN_PLAYERS} to ${MAX_PLAYERS}. Add them in the order you're sitting.`}
           onClose={router.back}
           mood="peek"
+          trailing={short > 0 ? null : <Button label="Done" icon="check" size="sm" variant="white" onPress={finish} />}
         />
 
         <View style={styles.addRow}>
@@ -104,7 +118,7 @@ export default function PlayersScreen() {
           </Text>
         ) : null}
 
-        <ScrollView contentContainerStyle={styles.list} keyboardShouldPersistTaps="handled">
+        <ScrollView contentContainerStyle={styles.list} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
           {players.map((player, index) => (
             <PopIn key={player.id} from="rise">
               <View style={styles.row}>
@@ -182,7 +196,7 @@ export default function PlayersScreen() {
             variant="primary"
             size="lg"
             disabled={short > 0}
-            onPress={router.back}
+            onPress={finish}
           />
         </Footer>
       </KeyboardAvoidingView>

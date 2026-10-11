@@ -4,7 +4,7 @@
     "slug": "imposter",
     "scheme": "imposter",
     "version": "0.1.0",
-    "orientation": "default",
+    "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "backgroundColor": "#0C0A10",
