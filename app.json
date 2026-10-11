@@ -49,6 +49,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "owner": "byw1",
+    "extra": {
+      "eas": {
+        "projectId": "fee0da56-a795-49d2-a6eb-b06a28d8148e"
+      }
     }
   }
 }
