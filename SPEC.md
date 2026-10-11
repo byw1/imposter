@@ -9,7 +9,7 @@ win.
 The genre is crowded and one famous game sits next to it. We don't name,
 compare against or borrow from any of them: our roles are **in** and **the
 imposter**, our phases are **clues**, **talk it out** and **vote**, and Shade is
-a round sticker head in shades. See the design system's Legal guardrails.
+a round sticker head with shady, half-shut eyes. See the design system's Legal guardrails.
 
 ---
 

@@ -49,9 +49,9 @@ design system.
   You page every night on this phone: best liar, best detective, word thief.
 - **Resume anything**: the game saves at every step. Close the app mid-vote and
   it picks up on the same screen.
-- **Shade**, the mascot: Dex's red cousin in dark shades, with a `?` card on
-  its forehead. It sneaks peeks over its shades, gasps at the vote and gets its
-  shades knocked crooked when caught.
+- **Shade**, the mascot: Dex's red cousin with shady, half-shut eyes and a `?`
+  card on its forehead. It gives the table a sideways look, gasps at the vote
+  and breaks into a sweat when caught.
 - Synthesised sound effects, haptics, dark and light themes, and reduced
   motion respected everywhere.
 
@@ -115,7 +115,7 @@ src/
   media/            Sound effects
   hooks/            Stores and settings
 assets/             App icon, splash, sounds
-spec/               Sound generator
+spec/               Sound and mascot-art generators
 ```
 
 ## Docs

@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, View } from 'react-native';
 import Svg, { Circle, Ellipse, G, Path, Rect, Text as SvgText } from 'react-native-svg';
+import { eyeParts, headParts, mouthParts, SHADE, type MascotMood, type Part } from './shadeFace';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
-import { color, font, palette } from './tokens';
+import { font } from './tokens';
 
-export type MascotMood = 'smirk' | 'peek' | 'excited' | 'gasp' | 'caught' | 'sleepy' | 'wink';
+export type { MascotMood };
 
 export type MascotProps = {
   mood?: MascotMood;
   size?: number;
-  /** Bob, peeks over the shades, glances and card wobbles. Off for small inline uses. */
+  /** Bob, blinks, shifty glances and card wobbles. Off for small inline uses. */
   animated?: boolean;
   /** The glyph on the forehead card. Shade doesn't know the word, so it's a question mark. */
   glyph?: string;
@@ -17,40 +18,25 @@ export type MascotProps = {
   poke?: boolean;
 };
 
-const INK = color.ink;
-const CHEEK = palette.cheek;
-
 /** The art is drawn on a 120-unit grid with room for the sticker border all round. */
 const VIEW = '-6 -6 132 132';
 const UNITS = 132;
 
 /** Where the card pivots: the middle of its bottom edge, stuck to the head. */
 const CARD_PIVOT = { x: 64 + 6, y: 55 + 6 };
-/** Where the shades pivot when they're knocked crooked. */
-const SHADES_PIVOT = { x: 60 + 6, y: 80 + 6 };
-
-/** How far the shades sit down the nose, in art units, and how crooked. */
-const SHADES: Record<MascotMood, { drop: number; tilt: number } | null> = {
-  smirk: { drop: 0, tilt: 0 },
-  peek: { drop: 4, tilt: 0 },
-  excited: { drop: 0, tilt: 0 },
-  gasp: { drop: 0, tilt: -3 },
-  caught: { drop: 5, tilt: -10 },
-  sleepy: null,
-  wink: { drop: 4, tilt: 0 },
-};
 
 /**
  * Shade, the imposter. Drawn exactly like Dex from Charades: a round sticker
  * head with a thick white border, an ink outline, flat colour, a soft
- * highlight, blush and a card stuck to its forehead. Two things change: the
- * head is red, and Shade wears dark shades. That's the whole spy costume, and
- * the name. The forehead card is lime with a question mark, tilted the other
- * way from Dex's: everyone else knows the word, Shade doesn't.
+ * highlight, blush and a card stuck to its forehead. The head is red, and the
+ * eyes are shady: heavy half-shut lids and a sideways look. The forehead card
+ * is lime with a question mark, tilted the other way from Dex's: everyone else
+ * knows the word, Shade doesn't.
  *
- * Shade is alive: a squashy bob, and every so often the shades slide down the
- * nose for a peek, eyes darting sideways, then back up. The card wobbles. All
- * of it stops under reduced motion.
+ * Shade is alive: a squashy bob, blinks, and eyes that dart about; every so
+ * often a smirking Shade narrows its eyes for a shifty look round the table.
+ * The card wobbles. All of it stops under reduced motion. The face itself
+ * lives in shadeFace.ts, shared with the design system's static art.
  */
 export function Mascot({ mood: moodProp = 'smirk', size = 120, animated = true, glyph = '?', poke = false }: MascotProps) {
   const reduced = useReducedMotion();
@@ -59,26 +45,33 @@ export function Mascot({ mood: moodProp = 'smirk', size = 120, animated = true, 
   const [bob] = useState(() => new Animated.Value(0));
   const [wiggle] = useState(() => new Animated.Value(0));
   const [boing] = useState(() => new Animated.Value(0));
-  const [slide] = useState(() => new Animated.Value(SHADES[moodProp]?.drop ?? 0));
   const [peeking, setPeeking] = useState(false);
   const [look, setLook] = useState(0);
   const [poked, setPoked] = useState(false);
+  const [blinking, setBlinking] = useState(false);
 
   const mood: MascotMood = poked ? 'excited' : peeking && moodProp === 'smirk' ? 'peek' : moodProp;
-  const shades = SHADES[mood];
   const k = size / UNITS;
 
-  // The shades follow the mood: down the nose to peek, crooked when caught.
+  // Blinks, at a human, uneven rhythm.
   useEffect(() => {
-    const target = shades?.drop ?? 0;
-    if (!live) {
-      slide.setValue(target);
-      return;
-    }
-    const animation = Animated.spring(slide, { toValue: target, friction: 7, tension: 90, useNativeDriver: true });
-    animation.start();
-    return () => animation.stop();
-  }, [live, shades?.drop, slide]);
+    if (!live) return;
+    let timeout: ReturnType<typeof setTimeout>;
+    const schedule = () => {
+      timeout = setTimeout(
+        () => {
+          setBlinking(true);
+          timeout = setTimeout(() => {
+            setBlinking(false);
+            schedule();
+          }, 130);
+        },
+        2400 + Math.random() * 2600,
+      );
+    };
+    schedule();
+    return () => clearTimeout(timeout);
+  }, [live]);
 
   // The bounce. Excited is quick and high, sleepy is slow breathing.
   useEffect(() => {
@@ -114,7 +107,7 @@ export function Mascot({ mood: moodProp = 'smirk', size = 120, animated = true, 
     return () => wobble.stop();
   }, [live, mood, wiggle]);
 
-  // A smirking Shade sneaks a peek over the shades every few seconds.
+  // A smirking Shade narrows its eyes for a shifty look every few seconds.
   useEffect(() => {
     if (!live || moodProp !== 'smirk') return;
     let timeout: ReturnType<typeof setTimeout>;
@@ -186,11 +179,6 @@ export function Mascot({ mood: moodProp = 'smirk', size = 120, animated = true, 
     ],
   };
 
-  const shadesLayer = {
-    transformOrigin: `${(SHADES_PIVOT.x / UNITS) * 100}% ${(SHADES_PIVOT.y / UNITS) * 100}%`,
-    transform: [{ translateY: Animated.multiply(slide, k) }, { rotate: `${shades?.tilt ?? 0}deg` }],
-  };
-
   const art = (
     <Animated.View style={[styles.fill, body]}>
       <Svg width={size} height={size} viewBox={VIEW}>
@@ -202,36 +190,23 @@ export function Mascot({ mood: moodProp = 'smirk', size = 120, animated = true, 
           </G>
         </G>
 
-        <Ellipse cx={60} cy={73} rx={42} ry={39} fill={palette.red} stroke={INK} strokeWidth={3.5} />
-        <Ellipse cx={60} cy={86} rx={30} ry={20} fill="#FFFFFF" opacity={0.08} />
+        {headParts().map(draw)}
         <Ellipse cx={34} cy={60} rx={5} ry={9} fill="#FFFFFF" opacity={0.28} transform="rotate(20 34 60)" />
-
-        <Ellipse cx={30} cy={95} rx={8} ry={5} fill={CHEEK} opacity={0.9} />
-        <Ellipse cx={90} cy={95} rx={8} ry={5} fill={CHEEK} opacity={0.9} />
-
-        <Eyes mood={mood} look={look} />
-        <Mouth mood={mood} />
+        {eyeParts(mood, look, blinking).map(draw)}
+        {mouthParts(mood).map(draw)}
       </Svg>
-
-      {shades ? (
-        <Animated.View style={[StyleSheet.absoluteFill, shadesLayer]} pointerEvents="none">
-          <Svg width={size} height={size} viewBox={VIEW}>
-            <Shades />
-          </Svg>
-        </Animated.View>
-      ) : null}
 
       <Animated.View style={[StyleSheet.absoluteFill, card]} pointerEvents="none">
         <Svg width={size} height={size} viewBox={VIEW}>
           <G transform="rotate(9 60 30)">
-            <Rect x={40} y={5} width={40} height={50} rx={9} fill={palette.lime} stroke={INK} strokeWidth={4} />
+            <Rect x={40} y={5} width={40} height={50} rx={9} fill={SHADE.card} stroke={SHADE.ink} strokeWidth={4} />
             <SvgText
               x={60}
               y={42}
               fontSize={[...glyph].length > 1 ? 18 : /\p{Extended_Pictographic}/u.test(glyph) ? 24 : 32}
               fontFamily={font.display}
               fontWeight="800"
-              fill={INK}
+              fill={SHADE.ink}
               textAnchor="middle"
             >
               {glyph}
@@ -259,19 +234,6 @@ export function Mascot({ mood: moodProp = 'smirk', size = 120, animated = true, 
         art
       )}
     </View>
-  );
-}
-
-/** Dark shades with a white glint on each lens. */
-function Shades() {
-  return (
-    <G>
-      <Rect x={29} y={73} width={27} height={15} rx={7} fill={INK} />
-      <Rect x={64} y={73} width={27} height={15} rx={7} fill={INK} />
-      <Path d="M56 77 Q60 74.5 64 77" stroke={INK} strokeWidth={3.5} strokeLinecap="round" fill="none" />
-      <Path d="M34 77.5 L39.5 76" stroke="#FFFFFF" strokeWidth={2.4} strokeLinecap="round" fill="none" />
-      <Path d="M69 77.5 L74.5 76" stroke="#FFFFFF" strokeWidth={2.4} strokeLinecap="round" fill="none" />
-    </G>
   );
 }
 
@@ -314,91 +276,21 @@ function Snooze({ size }: { size: number }) {
   );
 }
 
-const line = { stroke: INK, strokeWidth: 4, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, fill: 'none' };
-
-/** Where the shades' top rim sits, and the middle of each lens, in art units. */
-const RIM = 73;
-const LENS = { left: 42.5, right: 77.5 } as const;
-
-/**
- * Shade's eyes live behind the shades. They only show when the shades slip a
- * little way down the nose: then the top half of each eye peeks over the rim,
- * the rest hidden behind the lenses, which are drawn on top. Asleep, the shades
- * are off and the eyes are closed.
- */
-function Eyes({ mood, look }: { mood: MascotMood; look: number }) {
-  const drop = SHADES[mood]?.drop ?? 0;
-  const rim = RIM + drop;
-
-  // An ink eye centred on the rim, so only its top half shows, with a glint.
-  const peeper = (cx: number, cy: number) => (
-    <G key={cx}>
-      <Ellipse cx={cx} cy={cy + 0.5} rx={5.4} ry={6.4} fill={INK} />
-      <Circle cx={cx + 1.6} cy={cy - 2.8} r={1.8} fill="#FFFFFF" />
-    </G>
-  );
-
-  switch (mood) {
-    case 'peek': {
-      // Darting sideways, toward whoever is talking.
-      const dx = (look === 0 ? 1 : look) * 2.6;
-      return (
-        <G>
-          {peeper(LENS.left + dx, rim)}
-          {peeper(LENS.right + dx, rim)}
-        </G>
-      );
-    }
-    case 'wink':
-      return (
-        <G>
-          {peeper(LENS.left, rim)}
-          <Path d={`M${LENS.right - 6} ${rim - 0.5} Q${LENS.right} ${rim - 6} ${LENS.right + 6} ${rim - 0.5}`} {...line} strokeWidth={3.5} />
-        </G>
-      );
-    case 'caught': {
-      // Wide-eyed over shades knocked crooked: the left lens has dropped, the right has risen.
-      const eye = (cx: number, cy: number) => (
-        <G key={cx}>
-          <Circle cx={cx} cy={cy} r={6} fill="#FFFFFF" stroke={INK} strokeWidth={2.2} />
-          <Circle cx={cx + 0.6} cy={cy - 0.8} r={2.6} fill={INK} />
-        </G>
-      );
-      return (
-        <G>
-          {eye(LENS.left, rim + 1)}
-          {eye(LENS.right, rim - 5)}
-        </G>
-      );
-    }
-    case 'sleepy':
-      return <Path d="M37 82 Q44 87 51 82 M69 82 Q76 87 83 82" {...line} />;
-    default:
-      return null;
+/** One shape from shadeFace.ts, as a react-native-svg element. */
+function draw(part: Part, i: number) {
+  switch (part.tag) {
+    case 'ellipse':
+      return <Ellipse key={i} {...strip(part)} />;
+    case 'circle':
+      return <Circle key={i} {...strip(part)} />;
+    case 'path':
+      return <Path key={i} {...strip(part)} strokeLinecap="round" strokeLinejoin="round" />;
   }
 }
 
-function Mouth({ mood }: { mood: MascotMood }) {
-  switch (mood) {
-    case 'excited':
-      return (
-        <G>
-          <Path d="M50 96 Q60 110 70 96 Z" fill={INK} stroke={INK} strokeWidth={2.5} strokeLinejoin="round" />
-          <Ellipse cx={60} cy={103.5} rx={5} ry={3} fill={CHEEK} />
-        </G>
-      );
-    case 'gasp':
-      return <Ellipse cx={60} cy={101} rx={4.5} ry={5.5} fill={INK} />;
-    case 'caught':
-      return <Path d="M53 105 Q60 100 67 105" {...line} strokeWidth={3.5} />;
-    case 'peek':
-      return <Path d="M54 103 L66 102" {...line} strokeWidth={3.5} />;
-    case 'sleepy':
-      return <Ellipse cx={60} cy={100} rx={3} ry={3.5} fill={INK} />;
-    case 'smirk':
-    case 'wink':
-      return <Path d="M51 100 Q60 105 69 97" {...line} strokeWidth={3.5} />;
-  }
+function strip<T extends { tag: string }>(part: T): Omit<T, 'tag'> {
+  const { tag: _tag, ...rest } = part;
+  return rest;
 }
 
 const styles = StyleSheet.create({
