@@ -82,6 +82,7 @@ export default function WelcomeScreen() {
   const reduced = useReducedMotion();
   const { short } = useLayout();
   const [index, setIndex] = useState(0);
+  const [room, setRoom] = useState(400);
   const [progress] = useState(() => new Animated.Value(0));
   const stories = [...STORIES, FINAL];
 
@@ -122,15 +123,22 @@ export default function WelcomeScreen() {
           <View style={styles.topRow} pointerEvents="box-none">
             <View style={styles.from}>
               <Mascot size={32} animated={false} />
-              <Text style={styles.fromName}>Shade</Text>
-              <Text style={styles.fromTime}>how to play</Text>
+              <Text style={styles.fromName} maxFontSizeMultiplier={1.2}>Shade</Text>
+              <Text style={styles.fromTime} maxFontSizeMultiplier={1.2}>how to play</Text>
             </View>
             <CircleButton icon="close" label="Skip" tone="scrim" size={36} onPress={finish} />
           </View>
         </View>
 
         <View style={[styles.body, short && styles.bodySideways]} pointerEvents="box-none">
-          <View style={styles.middle} pointerEvents="none" key={index}>
+          <View
+            style={styles.middle}
+            pointerEvents="none"
+            key={index}
+            onLayout={(event) => setRoom(event.nativeEvent.layout.height)}
+          >
+            {/* Shade fills the space left over, so big text or a small phone shrinks the art, not the words. */}
+            <Mascot size={Math.max(96, Math.min(short ? 170 : 230, room * 0.6))} mood={story.mood} glyph={story.glyph} />
             {story.stickers?.map((sticker) => (
               <Sticker
                 key={sticker.text}
@@ -146,18 +154,17 @@ export default function WelcomeScreen() {
                 {sticker.text}
               </Sticker>
             ))}
-            <Mascot size={short ? 170 : 230} mood={story.mood} glyph={story.glyph} />
           </View>
 
           <View style={[styles.bottom, short && styles.bottomSideways]} pointerEvents="box-none">
             <Caption size="lg">{story.caption}</Caption>
-            <RNText style={styles.detail}>{story.detail}</RNText>
+            <RNText style={styles.detail} maxFontSizeMultiplier={1.3}>{story.detail}</RNText>
             {last ? (
               <View style={styles.cta}>
                 <Button label="Let’s play" variant="white" size="lg" onPress={finish} />
               </View>
             ) : (
-              <Text style={styles.tapHint}>Tap to continue</Text>
+              <Text style={styles.tapHint} maxFontSizeMultiplier={1.2}>Tap to continue</Text>
             )}
           </View>
         </View>

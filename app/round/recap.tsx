@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
   },
   blob: { position: 'absolute', width: 300, height: 300, top: -150, right: -100, borderRadius: 999, backgroundColor: color.cardBlob },
   topic: { fontFamily: font.heavy, fontSize: 13, lineHeight: 16, letterSpacing: 0.8 },
-  wordText: { fontFamily: font.display, fontSize: 64, lineHeight: 66, letterSpacing: -1.8, textAlign: 'center' },
+  wordText: { fontFamily: font.display, fontSize: 64, lineHeight: 72, letterSpacing: -1.8, textAlign: 'center' },
   card: { backgroundColor: color.surface, borderRadius: radius.lg, padding: space.md, gap: space.sm },
   cardRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   verdictEmoji: { fontSize: 34, lineHeight: 40 },

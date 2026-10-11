@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
   heroShort: { paddingVertical: 0 },
   headline: { alignItems: 'center' },
   hidden: { alignSelf: 'center', paddingHorizontal: 6 },
-  hiddenWord: { fontFamily: font.display, fontSize: 44, lineHeight: 48, letterSpacing: -1.2, color: color.brandText, textAlign: 'center' },
+  hiddenWord: { fontFamily: font.display, fontSize: 44, lineHeight: 50, letterSpacing: -1.2, color: color.brandText, textAlign: 'center' },
   card: { backgroundColor: color.surface, borderRadius: radius.lg, padding: space.md, gap: 12 },
   cardHead: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   cardLabel: { flex: 1 },

@@ -88,6 +88,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   custom: { backgroundColor: color.scrim },
-  name: { fontFamily: font.display, fontSize: 24, lineHeight: 26, letterSpacing: -0.4 },
+  name: { fontFamily: font.display, fontSize: 24, lineHeight: 28, letterSpacing: -0.4 },
   meta: { fontFamily: font.bold, fontSize: 13, lineHeight: 18, opacity: 0.8 },
 });

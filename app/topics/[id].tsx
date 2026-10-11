@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
   body: { paddingHorizontal: gutter, paddingBottom: space.lg, gap: space.lg },
   hero: { overflow: 'hidden', borderRadius: radius.lg, padding: space.lg, gap: space.sm, alignItems: 'flex-start' },
   blob: { position: 'absolute', width: 260, height: 260, top: -120, right: -90, borderRadius: 999, backgroundColor: color.cardBlob },
-  name: { fontFamily: font.display, fontSize: 40, lineHeight: 44, letterSpacing: -1, marginTop: space.sm },
+  name: { fontFamily: font.display, fontSize: 40, lineHeight: 46, letterSpacing: -1, marginTop: space.sm },
   meta: { fontFamily: font.bold, fontSize: 14, lineHeight: 18, opacity: 0.8 },
   words: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   word: { backgroundColor: color.surface, borderRadius: radius.pill, paddingHorizontal: 14, paddingVertical: 8 },

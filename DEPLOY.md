@@ -36,8 +36,10 @@ needs the internet.
 npm run store
 ```
 
-This builds for production and uploads to App Store Connect, where you fill in
-the listing and submit for review. Before launch, run a clearance search for
+This builds for production and uploads to App Store Connect (app ID
+`6821578816`, listed as **Imposter: Game Night**; the home screen just says
+Imposter). Each upload lands in TestFlight first: add testers there, then fill
+in the listing and submit for review when you're ready. Before launch, run a clearance search for
 the name (see the design system's Legal guardrails): "imposter" is a common
 word in this category, so pair it with a distinctive subtitle and Shade.
 

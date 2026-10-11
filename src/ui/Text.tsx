@@ -19,18 +19,21 @@ const tones: Record<Tone, string> = {
   focus: color.focus,
 };
 
+/** Big type is already big: it barely scales, or it would push everything else off screen. */
+const DISPLAY = new Set<Variant>(['hero', 'display', 'title', 'stat']);
+
 /**
  * UI text. The secret word on a RoleCard is its own component, since it fits
  * the card rather than following the type scale.
  *
  * Dynamic Type stays on, capped so the largest accessibility sizes still fit a
- * pill button rather than breaking out of it.
+ * pill button and a phone screen rather than breaking out of them.
  */
 export function Text({ variant = 'body', tone = 'default', align, style, ...rest }: TextProps) {
   return (
     <RNText
       style={StyleSheet.compose([type[variant], { color: tones[tone] }, align ? { textAlign: align } : null], style)}
-      maxFontSizeMultiplier={1.6}
+      maxFontSizeMultiplier={DISPLAY.has(variant) ? 1.2 : 1.4}
       {...rest}
     />
   );

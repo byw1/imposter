@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
   word: {
     fontFamily: font.display,
     fontSize: 64,
-    lineHeight: 66,
+    lineHeight: 72,
     letterSpacing: -1.8,
     textAlign: 'center',
   },

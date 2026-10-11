@@ -57,7 +57,13 @@ export function Chip({
     >
       <View style={styles.row}>
         {emoji ? <Text style={styles.emoji}>{emoji}</Text> : null}
-        <Text style={[styles.label, { color: ink }]} numberOfLines={1}>
+        <Text
+          style={[styles.label, { color: ink }]}
+          align="center"
+          numberOfLines={tall ? 2 : 1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.8}
+        >
           {label}
         </Text>
       </View>
@@ -87,7 +93,7 @@ const styles = StyleSheet.create({
   },
   facePill: { borderRadius: radius.pill, paddingVertical: space.sm },
   faceTall: { borderRadius: radius.md, paddingVertical: space.md - 2, gap: 2 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  label: { fontFamily: font.heavy, fontSize: 15, lineHeight: 20 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 6, maxWidth: '100%' },
+  label: { fontFamily: font.heavy, fontSize: 15, lineHeight: 20, flexShrink: 1 },
   emoji: { fontSize: 18, lineHeight: 24 },
 });

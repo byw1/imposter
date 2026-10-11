@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useLayout } from './layout';
 import { Mascot, type MascotMood } from './Mascot';
@@ -10,22 +11,24 @@ export type SetupHeaderProps = {
   subtitle?: string;
   onClose: () => void;
   mood?: MascotMood;
+  /** Something for the top-right corner, such as a Done button. */
+  trailing?: ReactNode;
 };
 
 /**
  * The header for a setup screen: a close button, the question in big type,
  * and Shade stuck beside it.
  */
-export function SetupHeader({ title, subtitle, onClose, mood = 'smirk' }: SetupHeaderProps) {
+export function SetupHeader({ title, subtitle, onClose, mood = 'smirk', trailing }: SetupHeaderProps) {
   const { short } = useLayout();
 
   if (short) {
-    return <TopBar leading="close" onLeading={onClose} title={title} trailing={<Mascot size={40} mood={mood} animated={false} />} />;
+    return <TopBar leading="close" onLeading={onClose} title={title} trailing={trailing ?? <Mascot size={40} mood={mood} animated={false} />} />;
   }
 
   return (
     <View>
-      <TopBar leading="close" onLeading={onClose} />
+      <TopBar leading="close" onLeading={onClose} trailing={trailing} />
       <View style={styles.ask}>
         <View style={styles.copy}>
           <Text variant="display" accessibilityRole="header">
