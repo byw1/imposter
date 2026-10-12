@@ -1,8 +1,9 @@
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
 import { Alert, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { nameProblem } from '@/game/players';
 import { MAX_NAME_LENGTH, MAX_PLAYERS, MIN_PLAYERS } from '@/game/types';
+import { PHASE_ROUTES, useGameStore } from '@/hooks/useGame';
 import { useHaptics } from '@/hooks/useHaptics';
 import { useTableStore } from '@/hooks/useTable';
 import { Avatar } from '@/ui/Avatar';
@@ -26,9 +27,14 @@ const PROBLEMS = {
 /**
  * Who's playing, in the order you're sitting. Clues go round in this order,
  * starting from a random seat each round. Saved, so next time it's one tap.
+ *
+ * Opened from Start game with too few players (`?start=1`), the last button
+ * starts the game itself instead of going back to the front door.
  */
 export default function PlayersScreen() {
   const router = useRouter();
+  const startAfter = useLocalSearchParams<{ start?: string }>().start === '1';
+  const startGame = useGameStore((s) => s.start);
   const haptics = useHaptics();
   const players = useTableStore((s) => s.players);
   const add = useTableStore((s) => s.add);
@@ -78,8 +84,16 @@ export default function PlayersScreen() {
   const finish = () => {
     if (pending) add(draft);
     Keyboard.dismiss();
-    router.back();
+    if (!startAfter) {
+      router.back();
+      return;
+    }
+    const table = useTableStore.getState();
+    startGame(table.players, table.settings);
+    router.replace(PHASE_ROUTES.deal);
   };
+  const doneLabel = startAfter ? 'Start game' : 'Done';
+  const doneIcon = startAfter ? 'play' : 'check';
 
   return (
     <Screen>
@@ -89,7 +103,7 @@ export default function PlayersScreen() {
           subtitle={`${MIN_PLAYERS} to ${MAX_PLAYERS}. Add them in the order you're sitting.`}
           onClose={router.back}
           mood="peek"
-          trailing={short > 0 ? null : <Button label="Done" icon="check" size="sm" variant="white" onPress={finish} />}
+          trailing={short > 0 ? null : <Button label={startAfter ? 'Start' : 'Done'} icon={doneIcon} size="sm" variant="white" onPress={finish} />}
         />
 
         <View style={styles.addRow}>
@@ -192,7 +206,8 @@ export default function PlayersScreen() {
 
         <Footer>
           <Button
-            label={short > 0 ? `Add ${short} more` : 'Done'}
+            label={short > 0 ? `Add ${short} more` : doneLabel}
+            icon={short > 0 ? undefined : doneIcon}
             variant="primary"
             size="lg"
             disabled={short > 0}

@@ -4,7 +4,7 @@ import { CircleButton } from '@/ui/CircleButton';
 import { Text } from '@/ui/Text';
 import { color, gutter, minTapTarget, space } from '@/ui/tokens';
 
-const STEPS = ['Peek', 'Clues', 'Talk', 'Vote'] as const;
+const STEPS = ['Peek', 'Clues', 'Vote'] as const;
 
 export type RoundStep = (typeof STEPS)[number] | null;
 
@@ -18,7 +18,7 @@ export type RoundHeaderProps = {
 
 /**
  * The bar across the top of every round screen: a way out, the round number,
- * and four quiet steps (peek, clues, talk, vote) so everyone knows how far
+ * and three quiet steps (peek, clues, vote) so everyone knows how far
  * along the round is.
  */
 export function RoundHeader({ round, step, onClose, trailing }: RoundHeaderProps) {

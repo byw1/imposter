@@ -16,26 +16,28 @@ design system.
 
 ## A round, start to finish
 
-1. **Set up once.** Add everyone in the order you're sitting. Pick topics and
-   house rules: 1 to 3 imposters (or a surprise), whether imposters see the
-   topic, how many clues each, the talk timer, and how you vote.
+1. **Add players, play.** Type everyone's names in the order you're sitting
+   and tap Start game. They're saved, so next time it's one tap. House rules
+   have sensible defaults and live behind the gear: 1 to 3 imposters (or a
+   surprise), whether imposters see the topic, how many clues each, a talk
+   timer, and how you vote.
 2. **Pass and peek.** The phone goes round. Each player's name fills the
    screen; they *hold* the big pill and their card turns over; they let go and
-   it's face down again. Every card looks, sounds and buzzes the same, in or
-   imposter.
-3. **Clues.** The phone sits in the middle and calls each player in turn:
-   *"Maya, one word."* The start seat is random every round.
-4. **Talk it out.** A quiet timer bar, and a nudge now and then
-   (*"Who was too vague?"*). +30 seconds if it's getting good.
-5. **Vote.** Either everyone points on a 3-2-1 and the host taps who got the
-   most fingers, or a secret vote where the phone goes round and the votes are
-   counted out one dot at a time. Ties get a revote between the tied players.
-6. **Reveal.** Drumroll, the sticker trembles, the censor bar slides off: *in*,
+   it's face down again, already showing the next name. Every card looks,
+   sounds and buzzes the same, in or imposter.
+3. **Clues and talk.** The phone goes in the middle and shows who starts and
+   the order round the table. Clues are said out loud, one word each, then
+   everyone argues; a timer is a tap away if you want one.
+4. **Vote.** Either the phone counts everyone in, 3-2-1, and the host taps who
+   got the most fingers, or a secret vote where the phone goes round and the
+   votes are counted out one dot at a time. Ties get a revote.
+5. **Reveal.** Drumroll, the sticker trembles, the censor bar slides off: *in*,
    or *the imposter*.
-7. **The steal.** A caught imposter picks the secret word from a handful of
+6. **The steal.** A caught imposter picks the secret word from a handful of
    words in the same topic. Right, and they steal the win.
-8. **Verdict and recap.** The screen turns blue (*Caught!*) or Shade's red
-   (*Got away*, *Stole it*), then the word, who scored, and tonight's table.
+7. **Verdict and recap.** The screen turns blue (*Caught!*) or Shade's red
+   (*Got away*, *Stole it*), then moves on by itself to the word, who scored,
+   and tonight's table.
 
 ## Features
 
@@ -103,7 +105,7 @@ To install it as a real app, or ship it: `npm run phone` and `npm run store`
 ```
 app/                Screens (Expo Router)
   new/              Players and house rules
-  round/            deal → clues → talk → vote → reveal → guess → verdict → recap
+  round/            deal (peek, then clues) → vote → reveal → guess → verdict → recap
   topics/           A topic's words, and the topic editor
 src/
   game/             Pure game logic: no React, no React Native

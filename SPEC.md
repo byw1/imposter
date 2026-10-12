@@ -43,10 +43,11 @@ React Native imports.
 - **The deal:** a word nobody has seen tonight from the chosen topics (all
   topics if none chosen), until every word is used. Imposters are picked
   uniformly. Clue order keeps the seating and starts from a random seat.
-- **Clues:** each player gives one word, going round `clueRounds` times.
-- **Talk:** a timer bar for `talkSeconds`, with +30s; 0 skips to the vote.
-- **Vote (point):** everyone points on three; the host taps the most-pointed
-  player.
+- **Clues:** each player gives one word out loud, going round `clueRounds`
+  times. The phone shows who starts and the order; nothing to tap per clue.
+- **Talk:** optional. A tap starts a timer bar for `talkSeconds`; 0 hides it.
+- **Vote (point):** the count starts on its own and everyone points on three;
+  the host taps the most-pointed player.
 - **Vote (secret):** each player votes privately, never for themselves. Most
   votes is voted out. A tie revotes between the tied players; a tied revote is
   a deadlock and the imposters get away.
@@ -101,12 +102,10 @@ Storage keys: `settings.v1`, `table.v1`, `topics.v1`, `game.v1`, `history.v1`.
 
 | Route | What |
 | --- | --- |
-| `/` | Home: Topics, Play, You, swiped like Charades |
-| `/welcome` | How to play, as stories |
-| `/new/players`, `/new/rules` | The table and house rules |
-| `/round/deal` | Pass and peek: HandOff, RoleCard, HoldToReveal |
-| `/round/clues` | TurnOrder |
-| `/round/talk` | TimerBar |
+| `/` | Home: Topics, Play, You, swiped like Charades. Opens straight on Play |
+| `/welcome` | How to play, as stories; offered, never forced |
+| `/new/players`, `/new/rules` | The table and house rules; with `?start=1` the table starts the game |
+| `/round/deal` | Pass and peek (HoldToReveal, letting go passes on), then the clue sheet: who starts, the order, an optional TimerBar |
 | `/round/vote` | VoteCards, point or secret |
 | `/round/reveal` | Drumroll and the censor bar |
 | `/round/guess` | The steal |

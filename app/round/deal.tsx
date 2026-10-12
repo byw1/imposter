@@ -1,8 +1,8 @@
 import { useKeepAwake } from 'expo-keep-awake';
 import { Redirect, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Animated, StyleSheet, View } from 'react-native';
-import { isImposter } from '@/game/deal';
+import { isImposter, playerById } from '@/game/deal';
 import { currentRound } from '@/game/session';
 import { PHASE_ROUTES, useGameStore } from '@/hooks/useGame';
 import { useHaptics } from '@/hooks/useHaptics';
@@ -19,18 +19,22 @@ import { PlayerChip } from '@/ui/PlayerChip';
 import { RoleCard } from '@/ui/RoleCard';
 import { Screen } from '@/ui/Screen';
 import { Text } from '@/ui/Text';
-import { gutter, space } from '@/ui/tokens';
+import { TimerBar } from '@/ui/TimerBar';
+import { color, gutter, space } from '@/ui/tokens';
 
 /**
  * Pass and peek.
  *
  * The phone goes round the table. Each player's name fills the top of the
  * screen so the right person reaches for it; they hold the big pill and their
- * card turns over; they let go and it's face down again before anyone else
- * can lean in. Then they pass it on.
+ * card turns over; they let go and it's face down again, already showing the
+ * next name. Nothing else to tap: they just pass it on.
  *
  * The screen looks, sounds and buzzes the same whatever the card says: same
  * colour, same layout, same reveal, same time on screen.
+ *
+ * Once everyone has looked, the same screen becomes the clue sheet: who
+ * starts, the order, an optional timer, and the vote.
  */
 export default function DealScreen() {
   useKeepAwake();
@@ -48,7 +52,6 @@ export default function DealScreen() {
   const go = useGameStore((s) => s.go);
 
   const [revealed, setRevealed] = useState(false);
-  const [seen, setSeen] = useState(false);
   // A second look for someone who missed it jumps back to the end afterwards.
   const [again, setAgain] = useState(false);
   const [deal] = useState(() => new Animated.Value(0));
@@ -77,7 +80,6 @@ export default function DealScreen() {
   const next = () => {
     haptics.select();
     setRevealed(false);
-    setSeen(false);
     if (again) {
       setAgain(false);
       setDealIndex(players.length);
@@ -88,53 +90,18 @@ export default function DealScreen() {
 
   if (done || !player) {
     return (
-      <Screen>
-        <RoundHeader round={round.number} step="Peek" onClose={leave} />
-        <View style={[styles.doneBody, short && styles.doneShort]}>
-          <PopIn>
-            <View style={styles.tilt}>
-              <Mascot size={short ? 110 : 170} mood="wink" poke />
-            </View>
-          </PopIn>
-          <PopIn delay={120} from="rise" style={styles.doneCopy}>
-            <Text variant="hero" align="center">
-              Everyone’s seen theirs
-            </Text>
-            <Text variant="body" tone="muted" align="center">
-              Phone in the middle. Clues go round, one word each.
-            </Text>
-          </PopIn>
-          <View style={styles.againBlock}>
-            <Text variant="caption" tone="muted" align="center">
-              Missed it? Tap your name for another look.
-            </Text>
-            <View style={styles.againRow}>
-              {players.map((p, index) => (
-                <PlayerChip
-                  key={p.id}
-                  player={p}
-                  onPress={() => {
-                    setAgain(true);
-                    setDealIndex(index);
-                  }}
-                />
-              ))}
-            </View>
-          </View>
-        </View>
-        <View style={styles.footer}>
-          <Button
-            label="Start clues"
-            icon="chat"
-            variant="primary"
-            size="lg"
-            onPress={() => {
-              go('clues');
-              router.replace(PHASE_ROUTES.clues);
-            }}
-          />
-        </View>
-      </Screen>
+      <ClueTime
+        onClose={leave}
+        onAgain={(index) => {
+          setAgain(true);
+          setDealIndex(index);
+        }}
+        onVote={() => {
+          haptics.select();
+          go('vote');
+          router.replace(PHASE_ROUTES.vote);
+        }}
+      />
     );
   }
 
@@ -192,23 +159,110 @@ export default function DealScreen() {
       </View>
 
       <View style={styles.footer}>
-        {seen && !revealed ? (
-          <PopIn from="rise">
-            <Button
-              label={again ? 'Done' : upcoming ? `Pass to ${upcoming.name}` : 'Done, everyone'}
-              icon={upcoming && !again ? 'forward' : 'check'}
-              onPress={next}
-            />
-          </PopIn>
-        ) : null}
         <HoldToReveal
+          openLabel={again || !upcoming ? 'Let go when you’re done' : `Let go, pass to ${upcoming.name}`}
           onReveal={() => {
             setRevealed(true);
-            setSeen(true);
             sound('reveal');
           }}
-          onHide={() => setRevealed(false)}
+          // Letting go hides the card and moves straight on to the next name.
+          onHide={next}
         />
+      </View>
+    </Screen>
+  );
+}
+
+/**
+ * Clue time. The phone goes face up in the middle: who starts, the order
+ * round the table, and one button for when the talking is done. The clues
+ * themselves are said out loud, so there's nothing to tap through. The start
+ * seat is random every round. A talk timer is there for tables that want one.
+ */
+function ClueTime({ onClose, onAgain, onVote }: { onClose: () => void; onAgain: (index: number) => void; onVote: () => void }) {
+  const haptics = useHaptics();
+  const sound = useSounds();
+  const { short } = useLayout();
+  const session = useGameStore((s) => s.session)!;
+  const round = currentRound(session)!;
+  const seconds = session.settings.talkSeconds;
+  const laps = session.settings.clueRounds;
+  const order = round.order.map((id) => playerById(session.players, id)).filter((p) => p !== undefined);
+  const starter = order[0];
+
+  const [endsAt, setEndsAt] = useState<number | null>(null);
+  const [nowMs, setNow] = useState(() => Date.now());
+  const buzzed = useRef(false);
+  const remaining = endsAt === null ? seconds * 1000 : Math.max(0, endsAt - nowMs);
+  const over = endsAt !== null && remaining === 0;
+
+  useEffect(() => {
+    if (endsAt === null) return;
+    const id = setInterval(() => setNow(Date.now()), 250);
+    return () => clearInterval(id);
+  }, [endsAt]);
+
+  useEffect(() => {
+    if (!over || buzzed.current) return;
+    buzzed.current = true;
+    sound('timeup');
+    haptics.thud();
+  }, [haptics, over, sound]);
+
+  return (
+    <Screen>
+      <RoundHeader round={round.number} step="Clues" onClose={onClose} />
+      <View style={[styles.doneBody, short && styles.doneShort]}>
+        {!short ? (
+          <PopIn>
+            <View style={styles.tilt}>
+              <Mascot size={130} mood="wink" poke />
+            </View>
+          </PopIn>
+        ) : null}
+        <PopIn delay={120} from="rise" style={styles.doneCopy}>
+          <Text variant="hero" align="center" numberOfLines={2} adjustsFontSizeToFit>
+            <Text variant="hero" style={{ color: color.brandText }}>
+              {starter?.name}
+            </Text>{' '}
+            starts
+          </Text>
+          <Text variant="body" tone="muted" align="center">
+            {laps > 1 ? `Go round ${laps} times, one word each.` : 'Go round once, one word each.'} Then talk it out and vote.
+            {session.settings.hint ? ` Topic: ${round.topicEmoji} ${round.topicName}.` : ''}
+          </Text>
+        </PopIn>
+        <View style={styles.againBlock}>
+          <View style={styles.againRow}>
+            {order.map((p) => (
+              <PlayerChip key={p.id} player={p} onPress={() => onAgain(session.players.indexOf(p))} />
+            ))}
+          </View>
+          <Text variant="caption" tone="muted" align="center">
+            In this order. Missed your card? Tap your name.
+          </Text>
+        </View>
+        {seconds > 0 && endsAt !== null ? (
+          <View style={styles.timer}>
+            <TimerBar fraction={remaining / (seconds * 1000)} warning={remaining <= 10_000} label={over ? 'Time’s up' : undefined} />
+          </View>
+        ) : null}
+      </View>
+      <View style={styles.footer}>
+        <Button label="Vote" icon="vote" variant="primary" size="lg" onPress={onVote} />
+        {seconds > 0 && endsAt === null ? (
+          <Button
+            label={`Start a ${seconds}s timer`}
+            icon="timer"
+            variant="ghost"
+            size="sm"
+            onPress={() => {
+              haptics.select();
+              setNow(Date.now());
+              setEndsAt(Date.now() + seconds * 1000);
+            }}
+          />
+        ) : null}
       </View>
     </Screen>
   );
@@ -228,5 +282,6 @@ const styles = StyleSheet.create({
   tilt: { transform: [{ rotate: '-6deg' }] },
   againBlock: { gap: space.sm, alignSelf: 'stretch' },
   againRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, justifyContent: 'center' },
+  timer: { alignSelf: 'stretch' },
 });
 
