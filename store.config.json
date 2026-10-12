@@ -1,0 +1,61 @@
+{
+  "configVersion": 0,
+  "apple": {
+    "copyright": "2026 William Lee",
+    "categories": [
+      [
+        "GAMES",
+        "GAMES_FAMILY",
+        "GAMES_WORD"
+      ],
+      "ENTERTAINMENT"
+    ],
+    "info": {
+      "en-US": {
+        "title": "Imposter: Game Night",
+        "subtitle": "Bluff with friends. No Wi-Fi.",
+        "promoText": "Everyone gets the secret word, except the imposter. One word each, then point on three. 3 to 12 players, 600 free words. No ads, no account, no Wi-Fi.",
+        "description": "One of you is lying. Find them.\n\nEveryone at the table gets the same secret word, except the imposter. Pass one phone round, give one-word clues, argue, and vote. Catch the imposter and they still get one guess at the word to steal the win.\n\nHOW IT PLAYS\n1. Pass the phone. Each player holds to peek at their card: the word, or \"Imposter\". Let go and it's face down again, already showing the next name.\n2. Go round the table, one word each. Too obvious and the imposter has the answer. Too vague and it looks like you.\n3. Talk it out, then vote: everyone points on 3, 2, 1, or a secret vote counted out one dot at a time.\n4. The reveal. A caught imposter picks the word from a handful in the same topic. Right, and they steal the win.\n\nFAIR BY DESIGN\nEvery card looks, sounds and buzzes the same, in or imposter: same colour, same layout, same reveal. The clue order starts from a random seat every round, and nobody sees a word twice in one night until every word is used.\n\n12 TOPICS, 600 WORDS, ALL FREE\nFood, Animals, Places, Jobs, Movies & TV, Sports, Around the House, Music, Party, Fantasy, School and Travel. Or make your own: inside jokes, your town, your group chat. Paste a list from anywhere.\n\nHOUSE RULES\n1 to 3 imposters, or a surprise. Hard mode, where the imposter doesn't even get the topic. One, two or three rounds of clues. An optional talk timer. Point vote or secret vote.\n\nFOR 3 TO 12 PLAYERS\nNames are saved, so next game night it's one tap to start. Scores carry across rounds, and the game saves at every step: close the app mid-vote and it picks up on the same screen.\n\nMEET SHADE\nA red, round, shifty-eyed mascot with a question mark stuck to its forehead. Poke it.\n\nPRIVATE BY DESIGN\nNo ads. No subscriptions. No in-app purchases. No account. Imposter works fully offline, on a plane, at a cabin or in a basement with no signal, and collects nothing. Everything stays on your phone.",
+        "keywords": [
+          "party",
+          "friends",
+          "bluff",
+          "secret",
+          "word",
+          "clue",
+          "guess",
+          "group",
+          "offline",
+          "family",
+          "deduction",
+          "liar",
+          "spy",
+          "who",
+          "hidden"
+        ],
+        "supportUrl": "https://github.com/byw1/imposter/issues",
+        "privacyPolicyUrl": "https://bywilliaml.com/imposter/privacy",
+        "marketingUrl": "https://bywilliaml.com/imposter"
+      }
+    },
+    "advisory": {
+      "alcoholTobaccoOrDrugUseOrReferences": "NONE",
+      "contests": "NONE",
+      "gamblingSimulated": "NONE",
+      "horrorOrFearThemes": "NONE",
+      "matureOrSuggestiveThemes": "NONE",
+      "medicalOrTreatmentInformation": "NONE",
+      "profanityOrCrudeHumor": "NONE",
+      "sexualContentGraphicAndNudity": "NONE",
+      "sexualContentOrNudity": "NONE",
+      "violenceCartoonOrFantasy": "NONE",
+      "violenceRealistic": "NONE",
+      "violenceRealisticProlongedGraphicOrSadistic": "NONE",
+      "gambling": false,
+      "unrestrictedWebAccess": false
+    },
+    "release": {
+      "automaticRelease": false
+    }
+  }
+}

@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<!-- The README's pictures: ?p=banner | phones | shade | screenshots. Rendered by render.js. -->
+<style>
+@font-face{font-family:Brico;src:url(assets/Bricolage-800.ttf)}
+@font-face{font-family:Jak;src:url(assets/Jakarta-700Bold.ttf);font-weight:700}
+@font-face{font-family:Jak;src:url(assets/Jakarta-800ExtraBold.ttf);font-weight:800}
+*{margin:0;box-sizing:border-box}
+body{background:#0C0A10;color:#fff;overflow:hidden}
+.page{position:relative;overflow:hidden;background:#0C0A10}
+.bars{position:absolute;inset:0;opacity:.12}
+.bars i{position:absolute;height:26px;border-radius:13px;background:#fff}
+.phone{position:relative;border-radius:64px;background:#0b0b0d;padding:14px;box-shadow:0 40px 80px rgba(0,0,0,.45),0 0 0 3px rgba(255,255,255,.1) inset}
+.phone img{display:block;width:100%;border-radius:52px}
+.phone .isl{position:absolute;top:28px;left:50%;margin-left:-60px;width:120px;height:34px;border-radius:20px;background:#000}
+.mark{display:inline-block;background:#C8FF2E;color:#0C0A10;padding:0 22px 6px;border-radius:20px;transform:rotate(-3deg)}
+.cap{font-family:Jak;font-weight:800;font-size:26px;color:#A8A3B5;text-align:center;margin-top:22px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const P = new URLSearchParams(location.search).get('p') || 'banner';
+const root = document.getElementById('root');
+
+function bars(w, h, seed) {
+  let s = seed, out = '';
+  const r = () => ((s = (s * 9301 + 49297) % 233280) / 233280);
+  for (let y = 20; y < h; y += 56) {
+    let x = -60 * r();
+    while (x < w) { const bw = 80 + r() * 260; out += `<i style="top:${y}px;left:${x}px;width:${bw}px"></i>`; x += bw + 20 + r() * 24; }
+  }
+  return `<div class="bars">${out}</div>`;
+}
+const phone = (src, w, extra = '') =>
+  `<div class="phone" style="width:${w}px;${extra}"><img src="assets/${src}"><div class="isl"></div></div>`;
+
+if (P === 'banner') {
+  // 2400×1000: the wordmark, the pitch, Shade, and three real screens fanned out.
+  root.innerHTML = `<div class="page" style="width:2400px;height:1000px">${bars(2400, 1000, 11)}
+    <img src="assets/shade-smirk.svg" style="position:absolute;left:130px;top:110px;width:300px;transform:rotate(-8deg)">
+    <div style="position:absolute;left:130px;top:430px;font-family:Brico;font-size:170px;letter-spacing:-5px;line-height:1">Imposter</div>
+    <div style="position:absolute;left:150px;top:620px;font-family:Brico;font-size:84px;letter-spacing:-2px"><span class="mark">Game Night</span></div>
+    <div style="position:absolute;left:135px;top:770px;width:1050px;font-family:Jak;font-weight:700;font-size:38px;line-height:1.4;color:#A8A3B5">
+      The hidden-word party game for iPhone. Fully offline, no accounts, no ads, open source.</div>
+    <div style="position:absolute;left:1300px;top:150px;transform:rotate(-8deg)">${phone('card-in.png', 360)}</div>
+    <div style="position:absolute;left:1640px;top:90px;transform:rotate(2deg);z-index:2">${phone('reveal.png', 380)}</div>
+    <div style="position:absolute;left:1990px;top:170px;transform:rotate(9deg)">${phone('card-imposter.png', 360)}</div>
+  </div>`;
+}
+
+if (P === 'phones') {
+  // 2400×1240: five real screens, one round, left to right.
+  const screens = [
+    ['home.png', 'Who’s playing'],
+    ['card-in.png', 'Hold to peek'],
+    ['clues.png', 'One word each'],
+    ['picked.png', 'Point on three'],
+    ['reveal.png', 'The reveal'],
+  ];
+  root.innerHTML = `<div class="page" style="width:2400px;height:1240px;display:flex;gap:56px;justify-content:center;align-items:center">${bars(2400, 1240, 23)}
+    ${screens.map(([src, cap]) => `<div style="position:relative">${phone(src, 400)}<div class="cap">${cap}</div></div>`).join('')}
+  </div>`;
+}
+
+if (P === 'shade') {
+  // 2400×560: Shade's seven moods, from the same shapes the app draws.
+  const moods = ['smirk', 'peek', 'wink', 'excited', 'gasp', 'caught', 'sleepy'];
+  root.innerHTML = `<div class="page" style="width:2400px;height:560px;display:flex;justify-content:center;align-items:center;gap:40px">${bars(2400, 560, 5)}
+    ${moods.map((m, i) => `<div style="position:relative;text-align:center"><img src="assets/shade-${m}.svg" style="width:270px;transform:rotate(${[-6, 4, -3, 6, -5, 3, -4][i]}deg)"><div class="cap" style="margin-top:6px">${m}</div></div>`).join('')}
+  </div>`;
+}
+
+if (P === 'screenshots') {
+  // 2400×750: the seven App Store screenshots in a row.
+  root.innerHTML = `<div class="page" style="width:2400px;height:750px;display:flex;gap:24px;justify-content:center;align-items:center;background:#0C0A10">
+    ${[1, 2, 3, 4, 5, 6, 7].map((n) => `<img src="store/appstore-${n}.png" style="width:300px;border-radius:28px">`).join('')}
+  </div>`;
+}
+</script>
+</body>
+</html>

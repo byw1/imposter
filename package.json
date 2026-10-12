@@ -11,7 +11,8 @@
     "store": "npx eas-cli@latest build --profile production --platform ios --auto-submit",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "test": "jest"
+    "test": "jest",
+    "store-art": "scripts/store-art/run.sh"
   },
   "dependencies": {
     "@expo-google-fonts/bricolage-grotesque": "^0.4.1",
@@ -53,5 +54,6 @@
     "@emnapi/core": "1.10.0",
     "@emnapi/runtime": "1.10.0",
     "@emnapi/wasi-threads": "1.2.1"
-  }
+  },
+  "license": "AGPL-3.0-or-later"
 }
