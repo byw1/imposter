@@ -38,7 +38,15 @@ export default function HomeScreen() {
     setPage(index);
   };
 
-  const play = () => {
+  const play = (quick?: number) => {
+    if (quick && players.length === 0) {
+      // First game with no names: seat numbered players and deal straight away.
+      useTableStore.getState().quickStart(quick);
+      const table = useTableStore.getState();
+      start(table.players, table.settings);
+      router.push(PHASE_ROUTES.deal);
+      return;
+    }
     if (players.length < MIN_PLAYERS) {
       // Straight into the game once the names are in, not back here.
       router.push({ pathname: '/new/players', params: { start: '1' } });

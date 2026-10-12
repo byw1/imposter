@@ -1,4 +1,4 @@
-import { addPlayer, cleanName, initial, movePlayer, nameProblem, nextColor, removePlayer, renamePlayer, tiltFor } from './players';
+import { addPlayer, cleanName, initial, movePlayer, nameProblem, nextColor, quickTable, removePlayer, renamePlayer, tiltFor } from './players';
 import { MAX_PLAYERS, type Player } from './types';
 
 const table = (names: string[]): Player[] => names.reduce<Player[]>((acc, name, i) => addPlayer(acc, name, `p${i}`), []);
@@ -45,5 +45,16 @@ describe('the roster', () => {
     for (const id of ['a', 'b', 'c', 'ply_123']) {
       expect(Math.abs(tiltFor(id))).toBeLessThanOrEqual(10);
     }
+  });
+
+  it('quick-starts a numbered table, each player with their own colour and number', () => {
+    let n = 0;
+    const table = quickTable(5, () => `id${n++}`);
+    expect(table.map((p) => p.name)).toEqual(['Player 1', 'Player 2', 'Player 3', 'Player 4', 'Player 5']);
+    expect(new Set(table.map((p) => p.color)).size).toBe(5);
+    expect(new Set(table.map((p) => p.id)).size).toBe(5);
+    expect(table.map((p) => initial(p.name))).toEqual(['1', '2', '3', '4', '5']);
+    expect(initial('Player 12')).toBe('12');
+    expect(initial('Playerish')).toBe('P');
   });
 });

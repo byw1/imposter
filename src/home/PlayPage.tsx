@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, Text as RNText, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { maxImposters } from '@/game/deal';
 import { latestRound } from '@/game/session';
-import { MIN_PLAYERS } from '@/game/types';
+import { MAX_PLAYERS, MIN_PLAYERS } from '@/game/types';
 import { useGameStore } from '@/hooks/useGame';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useSettingsStore } from '@/hooks/useSettings';
@@ -23,7 +23,8 @@ import { color, font, gutter, radius, space } from '@/ui/tokens';
 
 export type PlayPageProps = {
   bottomInset: number;
-  onPlay: () => void;
+  /** Start a game. With nobody at the table yet, `quick` is how many numbered players to seat. */
+  onPlay: (quick?: number) => void;
   onResume: () => void;
   onPlayers: () => void;
   onRules: () => void;
@@ -73,7 +74,10 @@ export function PlayPage({ bottomInset, onPlay, onResume, onPlayers, onRules, on
     };
   }, [reduced]);
 
-  const ready = players.length >= MIN_PLAYERS;
+  const empty = players.length === 0;
+  // Nobody at the table yet: start with this many numbered players, no typing.
+  const [quick, setQuick] = useState(4);
+  const ready = empty || players.length >= MIN_PLAYERS;
   const inProgress = Boolean(session && latestRound(session));
 
   return (
@@ -138,15 +142,42 @@ export function PlayPage({ bottomInset, onPlay, onResume, onPlayers, onRules, on
           ) : null}
         </View>
 
-        <Tap onPress={onPlayers} squish={0.98} accessibilityLabel={`Players: ${players.length}. Edit.`} contentStyle={styles.card}>
-          <View style={styles.cardHead}>
-            <Icon name="users" size={18} color={color.textMuted} />
-            <Text variant="overline" tone="muted" style={styles.cardLabel}>
-              {`PLAYERS · ${players.length}`}
+        {empty ? (
+          <View style={styles.card}>
+            <View style={styles.cardHead}>
+              <Icon name="users" size={18} color={color.textMuted} />
+              <Text variant="overline" tone="muted" style={styles.cardLabel}>
+                HOW MANY PLAYING?
+              </Text>
+              <Tap onPress={onPlayers} haptic={false} accessibilityLabel="Add names instead">
+                <Text style={styles.cardAction}>Add names</Text>
+              </Tap>
+            </View>
+            <View style={styles.stepper}>
+              <CircleButton icon="minus" label="One fewer player" size={52} onPress={() => setQuick((n) => Math.max(MIN_PLAYERS, n - 1))} />
+              <View style={styles.count} accessible accessibilityLiveRegion="polite" accessibilityLabel={`${quick} players`}>
+                <Text variant="display" align="center">
+                  {quick}
+                </Text>
+                <Text variant="caption" tone="muted" align="center">
+                  players
+                </Text>
+              </View>
+              <CircleButton icon="plus" label="One more player" size={52} onPress={() => setQuick((n) => Math.min(MAX_PLAYERS, n + 1))} />
+            </View>
+            <Text variant="caption" tone="muted" align="center">
+              No typing: you’ll be Player 1, 2, 3… Add names any time.
             </Text>
-            <Text style={styles.cardAction}>{players.length ? 'Edit' : 'Add'}</Text>
           </View>
-          {players.length ? (
+        ) : (
+          <Tap onPress={onPlayers} squish={0.98} accessibilityLabel={`Players: ${players.length}. Edit.`} contentStyle={styles.card}>
+            <View style={styles.cardHead}>
+              <Icon name="users" size={18} color={color.textMuted} />
+              <Text variant="overline" tone="muted" style={styles.cardLabel}>
+                {`PLAYERS · ${players.length}`}
+              </Text>
+              <Text style={styles.cardAction}>Edit</Text>
+            </View>
             <View style={styles.avatars}>
               {players.map((p, i) => (
                 <PopIn key={p.id} delay={i * 40} style={styles.avatarSpot}>
@@ -157,12 +188,8 @@ export function PlayPage({ bottomInset, onPlay, onResume, onPlayers, onRules, on
                 </PopIn>
               ))}
             </View>
-          ) : (
-            <Text variant="body" tone="muted">
-              Add everyone at the table. You need at least {MIN_PLAYERS}.
-            </Text>
-          )}
-        </Tap>
+          </Tap>
+        )}
 
         {players.length > 0 && players.length < 5 && settings.imposters !== 'surprise' && settings.imposters > maxImposters(players.length) ? (
           <Text variant="caption" tone="muted" align="center">
@@ -177,7 +204,7 @@ export function PlayPage({ bottomInset, onPlay, onResume, onPlayers, onRules, on
           icon={ready ? 'play' : 'plus'}
           variant="primary"
           size="lg"
-          onPress={onPlay}
+          onPress={() => onPlay(empty ? quick : undefined)}
           accessibilityHint={ready ? 'Deals the roles. Pass the phone round.' : `You need at least ${MIN_PLAYERS} players.`}
         />
       </View>
@@ -203,6 +230,8 @@ const styles = StyleSheet.create({
   avatars: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   avatarSpot: { width: 56, alignItems: 'center', gap: 4 },
   avatarName: { maxWidth: 56 },
+  stepper: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.lg },
+  count: { minWidth: 96 },
   learn: { alignSelf: 'center', flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: space.xs },
   learnText: { fontFamily: font.heavy, fontSize: 15, lineHeight: 20, color: color.brandText },
   footer: { paddingTop: space.sm },

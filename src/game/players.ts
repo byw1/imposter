@@ -60,7 +60,23 @@ export function movePlayer(players: readonly Player[], id: string, by: -1 | 1): 
 
 /** The first letter of a name, for the sticker disc. */
 export function initial(name: string): string {
+  // A quick-start player wears their number: "Player 3" is 3, not P.
+  const numbered = QUICK_NAME.exec(name.trim());
+  if (numbered) return numbered[1]!;
   return [...name.trim()][0]?.toLocaleUpperCase() ?? '?';
+}
+
+/** The names a quick start gives: Player 1, Player 2… */
+const QUICK_NAME = /^Player (\d{1,2})$/;
+
+/**
+ * A table of `count` numbered players, for starting without typing a name.
+ * They can be renamed any time; the numbers just keep the hand-off clear.
+ */
+export function quickTable(count: number, makeId: () => string): Player[] {
+  let players: Player[] = [];
+  for (let n = 1; n <= count; n++) players = addPlayer(players, `Player ${n}`, makeId());
+  return players;
 }
 
 /** A tilt between -10 and 10 degrees, fixed per player so a sticker never jumps. */

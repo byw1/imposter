@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { clampImposters } from '@/game/deal';
 import { makePlayerId } from '@/game/ids';
-import { addPlayer, movePlayer, removePlayer, renamePlayer } from '@/game/players';
+import { addPlayer, movePlayer, quickTable, removePlayer, renamePlayer } from '@/game/players';
 import { DEFAULT_SETTINGS, type GameSettings, type Player } from '@/game/types';
 import { parsePlayers, parseSettings } from '@/game/validate';
 import { loadJSON, saveJSON } from '@/storage/kv';
@@ -17,6 +17,8 @@ type Table = { players: Player[]; settings: GameSettings };
 
 type TableStore = Table & {
   add(name: string): void;
+  /** Seats `count` numbered players (Player 1, Player 2…) in place of whoever is there. */
+  quickStart(count: number): void;
   rename(id: string, name: string): void;
   remove(id: string): void;
   move(id: string, by: -1 | 1): void;
@@ -50,6 +52,10 @@ export const useTableStore = create<TableStore>((set, get) => {
 
     add(name) {
       commit({ ...table(), players: addPlayer(get().players, name, makePlayerId()) });
+    },
+
+    quickStart(count) {
+      commit({ ...table(), players: quickTable(count, makePlayerId) });
     },
     rename(id, name) {
       commit({ ...table(), players: renamePlayer(get().players, id, name) });

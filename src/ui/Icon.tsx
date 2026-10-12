@@ -7,6 +7,7 @@ export type IconName =
   | 'close'
   | 'settings'
   | 'plus'
+  | 'minus'
   | 'check'
   | 'share'
   | 'trash'
@@ -106,6 +107,8 @@ function shape(name: IconName, s: Stroke, fill: string) {
       );
     case 'plus':
       return <Path d="M12 5 V19 M5 12 H19" {...s} />;
+    case 'minus':
+      return <Path d="M5 12 H19" {...s} />;
     case 'check':
       return <Path d="M5 12.5 L10 17.5 L19 7" {...s} />;
     case 'pass':
