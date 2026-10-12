@@ -1,0 +1,135 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:Brico;src:url(assets/Bricolage-800.ttf)}
+@font-face{font-family:Jak;src:url(assets/Jakarta-700Bold.ttf);font-weight:700}
+@font-face{font-family:Jak;src:url(assets/Jakarta-800ExtraBold.ttf);font-weight:800}
+*{margin:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#0C0A10}
+#st{position:relative;width:1080px;height:1920px;overflow:hidden}
+.abs{position:absolute}
+.bars{position:absolute;inset:-200px;opacity:.14}
+.bars i{position:absolute;height:34px;border-radius:17px;background:var(--bar,#fff)}
+.t{font-family:Brico;letter-spacing:-3px;line-height:1.02;text-align:center;left:60px;right:60px}
+.s{font-family:Jak;font-weight:800;text-align:center;left:80px;right:80px}
+.mark{display:inline-block;background:#C8FF2E;color:#0C0A10;padding:0 26px 8px;border-radius:24px}
+.markd{display:inline-block;background:#0C0A10;color:#C8FF2E;padding:0 26px 8px;border-radius:24px}
+.phone{width:660px;height:1434px;left:210px;border-radius:96px;background:#0b0b0d;padding:20px;box-shadow:0 50px 100px rgba(0,0,0,.4)}
+.phone img{position:absolute;left:20px;top:20px;width:620px;height:1394px;border-radius:78px;object-fit:cover}
+.isl{position:absolute;top:40px;left:50%;margin-left:-90px;width:180px;height:52px;border-radius:30px;background:#000}
+.tag{font-family:Brico;font-size:66px;padding:10px 36px 20px;border-radius:26px;box-shadow:0 20px 40px rgba(0,0,0,.25)}
+.av{width:150px;height:150px;border-radius:75px;border:9px solid #fff;font-family:Brico;font-size:80px;display:flex;align-items:center;justify-content:center;color:#0C0A10}
+.dot{width:26px;height:26px;border-radius:6px}
+.fc{display:flex;align-items:center;justify-content:center}
+</style></head><body><div id="st"></div>
+<script>
+const Q=new URLSearchParams(location.search);const V=Q.get('v')||'A';const WHO=Q.get('who')||'Sam';
+const st=document.getElementById('st');
+const C={lime:'#C8FF2E',red:'#FF4560',blue:'#2EA8FF',purple:'#9B5CFF',teal:'#00C2B2',yellow:'#FFE500',orange:'#FF6B2C',indigo:'#5B5BFF',magenta:'#E040FB',ink:'#0C0A10'};
+const cl=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const seg=(t,a,b)=>cl((t-a)/(b-a));
+const eo=x=>1-Math.pow(1-x,3);
+const back=x=>{const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2)};
+const el=(html)=>{const d=document.createElement('div');d.innerHTML=html.trim();const e=d.firstChild;st.appendChild(e);return e};
+function bars(color,seed){let s=seed;const r=()=>{s=(s*9301+49297)%233280;return s/233280};let h='';for(let y=0;y<2320;y+=72){let x=-80*r();while(x<1480){const w=100+r()*320;h+=`<i style="top:${y}px;left:${x}px;width:${w}px"></i>`;x+=w+26+r()*30;}}return el(`<div class="bars" style="--bar:${color}">${h}</div>`)}
+const bg=el(`<div class="abs" style="inset:0"></div>`);
+const bgBars=bars('#fff',7);
+const set=(e,o)=>{for(const k in o){if(k==='tf')e.style.transform=o[k];else if(k==='op')e.style.opacity=o[k];else e.style[k]=o[k];}};
+function phone(src){const e=el(`<div class="abs phone"><img src="assets/${src}"><div class="isl"></div></div>`);return e}
+function shade(m,w){return el(`<img class="abs" src="assets/shade-${m}.svg" style="width:${w}px;filter:drop-shadow(0 24px 30px rgba(0,0,0,.3))">`)}
+const scenes=[]; // {a,b,bg,bar,fn}
+let DUR=15;
+function background(t){for(const s of scenes){if(t>=s.a&&t<s.b){bg.style.background=s.bg;bgBars.style.setProperty('--bar',s.bar||'#000');bgBars.style.transform=`translateX(${-(t*60)%120}px)`;}}}
+// shared end card
+function endCard(a){
+  const sh=shade('excited',420), w=el(`<div class="abs t" style="font-size:200px;color:#fff;top:930px">Imposter</div>`), g=el(`<div class="abs t" style="top:1150px;font-size:110px"><span class="mark">Game Night</span></div>`);
+  const s=el(`<div class="abs s" style="top:1340px;font-size:50px;color:#A8A3B5">The party game for 3–12 friends.<br>No Wi‑Fi. No accounts.</div>`);
+  const pill=el(`<div class="abs fc" style="left:290px;top:1560px;width:500px;height:120px;border-radius:60px;border:4px solid #fff;color:#fff;font-family:Jak;font-weight:800;font-size:46px">On the App Store</div>`);
+  return t=>{const on=t>=a;[sh,w,g,s,pill].forEach(e=>e.style.display=on?'':'none');if(!on)return;
+    const p=seg(t,a,a+.5),q=seg(t,a+.25,a+.8),r=seg(t,a+.5,a+1.1);
+    set(sh,{left:'330px',top:(420+Math.sin(t*6)*18)+'px',tf:`scale(${back(p)}) rotate(${Math.sin(t*3)*5}deg)`});
+    set(w,{op:q,tf:`translateY(${(1-eo(q))*60}px)`}); set(g,{op:q,tf:`rotate(-3deg) scale(${.6+.4*back(q)})`});
+    set(s,{op:r}); set(pill,{op:r,tf:`translateY(${(1-eo(r))*40}px)`});}
+}
+const U=[];
+if(V==='A'){
+  DUR=15;
+  scenes.push({a:0,b:2.6,bg:C.ink,bar:'#fff'},{a:2.6,b:5.2,bg:C.teal,bar:C.ink},{a:5.2,b:7.6,bg:C.red,bar:C.ink},{a:7.6,b:10,bg:C.yellow,bar:C.ink},{a:10,b:12,bg:C.purple,bar:C.ink},{a:12,b:99,bg:C.ink,bar:'#fff'});
+  // scene 1
+  const h1=el(`<div class="abs t" style="top:640px;font-size:150px;color:#fff">One of you is</div>`);
+  const word=el(`<div class="abs t" style="top:820px;font-size:190px;color:#C8FF2E">lying.</div>`);
+  const bar=el(`<div class="abs" style="left:290px;top:840px;width:500px;height:200px;border-radius:30px;background:#fff"></div>`);
+  const s1=shade('smirk',360);
+  U.push(t=>{const on=t<2.6;[h1,word,bar,s1].forEach(e=>e.style.display=on?'':'none');if(!on)return;
+    const p=seg(t,.1,.5);set(h1,{op:p,tf:`scale(${.7+.3*back(p)})`});
+    const lift=seg(t,1.2,1.6);set(word,{op:seg(t,.4,.6)}); set(bar,{op:seg(t,.4,.6),tf:`translateX(${eo(lift)*1300}px) rotate(${-4+lift*10}deg)`,op:seg(t,.4,.6)*(1-seg(t,1.45,1.6))});
+    set(s1,{left:'360px',top:(1180+Math.sin(t*7)*14)+'px',tf:`scale(${back(seg(t,.9,1.4))})`});
+    const out=seg(t,2.3,2.6);if(out>0){set(h1,{op:1-out});set(word,{op:1-out});set(s1,{op:1-out})}});
+  // phone scenes
+  const ph=phone('deal.png'); const img=ph.querySelector('img');
+  const cap=el(`<div class="abs t" style="top:130px;font-size:110px"></div>`);
+  const tags=[el(`<div class="abs tag" style="background:${C.purple};color:#fff">cheesy?</div>`),el(`<div class="abs tag" style="background:${C.ink};color:${C.lime}">slice!</div>`),el(`<div class="abs tag" style="background:#fff;color:${C.ink}">Italian?</div>`)];
+  const s2=shade('smirk',330);
+  U.push(t=>{const on=t>=2.6&&t<10;ph.style.display=cap.style.display=on?'':'none';if(!on){tags.forEach(x=>x.style.display='none');s2.style.display='none';return}
+    const enter=seg(t,2.6,3.2);let y=430+(1-eo(enter))*1500;
+    let rot=0,sx=1;
+    if(t<5.2){cap.innerHTML='Everyone gets<br><span class="markd">the word.</span>';cap.style.color=C.ink;
+      const f=seg(t,3.7,4.1);sx=Math.abs(Math.cos(f*Math.PI));img.src='assets/'+(f<.5?'deal.png':'card-in.png');}
+    else if(t<7.6){cap.innerHTML='Except the<br><span class="markd">imposter.</span>';cap.style.color='#fff';img.src='assets/card-imposter.png';rot=Math.sin(t*30)*seg(t,5.2,5.5)*(1-seg(t,5.5,5.8))*4;}
+    else {cap.innerHTML='One word each.<br><span class="markd">Bluff.</span>';cap.style.color=C.ink;img.src='assets/clues.png';}
+    const capIn=t<5.2?seg(t,2.8,3.2):t<7.6?seg(t,5.2,5.5):seg(t,7.6,7.9);
+    set(cap,{op:capIn,tf:`scale(${.8+.2*back(capIn)})`});
+    set(ph,{top:y+'px',tf:`rotate(${rot}deg) scaleX(${sx})`});
+    const sOn=t>=5.4&&t<7.6;s2.style.display=sOn?'':'none';if(sOn){const q=seg(t,5.4,5.8);set(s2,{left:(-340+eo(q)*380)+'px',top:'1380px',tf:`rotate(${-12+Math.sin(t*5)*4}deg)`})}
+    const pos=[[60,820,-8],[730,1050,7],[90,1330,-4]];
+    tags.forEach((e,i)=>{const on2=t>=7.9+i*.45&&t<10;e.style.display=on2?'':'none';if(on2){const q=seg(t,7.9+i*.45,8.25+i*.45);set(e,{left:pos[i][0]+'px',top:pos[i][1]+'px',tf:`rotate(${pos[i][2]}deg) scale(${back(q)})`})}});
+    const out=seg(t,9.75,10);if(out>0)set(ph,{op:1-out});else ph.style.opacity=1;});
+  // countdown
+  const big=el(`<div class="abs t" style="top:560px;font-size:620px;color:#fff;letter-spacing:-20px"></div>`);
+  const point=el(`<div class="abs fc" style="left:190px;top:610px;width:700px;height:700px;border-radius:350px;background:${C.lime};font-family:Brico;font-size:190px;color:${C.ink}">Point!</div>`);
+  const sub=el(`<div class="abs s" style="top:1420px;font-size:60px;color:#fff">Everyone points.<br>No changing your mind.</div>`);
+  U.push(t=>{const on=t>=10&&t<12;[big,point,sub].forEach(e=>e.style.display=on?'':'none');if(!on)return;
+    const k=Math.floor((t-10)/.45);const lp=((t-10)%.45)/.45;
+    if(k<3){big.textContent=String(3-k);point.style.display='none';set(big,{op:1,tf:`scale(${1.5-.5*eo(lp)})`})}else{big.style.display='none';const q=seg(t,11.35,11.6);set(point,{tf:`rotate(-8deg) scale(${back(q)})`})}
+    set(sub,{op:seg(t,10.1,10.4)});});
+  U.push(endCard(12));
+}
+if(V==='B'){
+  DUR=14;
+  scenes.push({a:0,b:2.4,bg:C.magenta,bar:C.ink},{a:2.4,b:4.6,bg:C.ink,bar:'#fff'},{a:4.6,b:7,bg:C.orange,bar:C.ink},{a:7,b:9.6,bg:C.indigo,bar:C.ink},{a:9.6,b:10.8,bg:C.blue,bar:C.ink},{a:10.8,b:11.8,bg:C.red,bar:C.ink},{a:11.8,b:99,bg:C.ink,bar:'#fff'});
+  const lines=[['5 friends.',0.05],['1 secret word.',0.65],['1 imposter.',1.25]];
+  const L=lines.map(([s],i)=>el(`<div class="abs t" style="top:${[600,800,1020][i]}px;font-size:${i==2?170:130}px;color:#fff;white-space:nowrap;left:0;right:0">${i==2?'<span class="markd">1 imposter.</span>':s}</div>`));
+  U.push(t=>{L.forEach((e,i)=>{const on=t<2.4&&t>=lines[i][1];e.style.display=on?'':'none';if(on){const q=seg(t,lines[i][1],lines[i][1]+.3);set(e,{tf:`scale(${2-1*eo(q)}) rotate(${i==2?-3:0}deg)`,op:q*(1-seg(t,2.2,2.4))})}})});
+  // avatars
+  const P=[['M',C.purple],['L',C.teal],['P',C.yellow],['S',C.orange],['J',C.indigo]];
+  const avs=P.map(([l,c])=>el(`<div class="abs av" style="background:${c}">${l}</div>`));
+  const q1=el(`<div class="abs t" style="top:520px;font-size:150px;color:#fff">Who’s <span class="mark">lying?</span></div>`);
+  const qm=el(`<div class="abs" style="font-family:Brico;font-size:120px;color:${C.lime}">?</div>`);
+  U.push(t=>{const on=t>=2.4&&t<4.6;[...avs,q1,qm].forEach(e=>e.style.display=on?'':'none');if(!on)return;
+    set(q1,{op:seg(t,2.45,2.7),tf:`scale(${.8+.2*back(seg(t,2.45,2.75))})`});
+    avs.forEach((e,i)=>{const q=seg(t,2.6+i*.12,2.95+i*.12);const hop=Math.max(0,Math.sin((t*6)+i))*24;const sus=i===3&&t>3.6?Math.sin(t*40)*6:0;set(e,{left:(55+i*200)+'px',top:(1000-hop)+'px',tf:`scale(${back(q)}) rotate(${sus}deg)`})});
+    const qq=seg(t,3.6,3.85);set(qm,{left:'665px',top:(820-qq*20)+'px',op:qq,tf:`scale(${back(qq)}) rotate(10deg)`});});
+  // phones
+  const ph=phone('picked.png');const img=ph.querySelector('img');
+  const cap=el(`<div class="abs t" style="top:130px;font-size:110px;color:#fff"></div>`);
+  U.push(t=>{const on=t>=4.6&&t<9.6;ph.style.display=cap.style.display=on?'':'none';if(!on)return;
+    const enter=seg(t,4.6,5.1);let y=430+(1-eo(enter))*1500,sc=1,rot=0;
+    if(t<7){cap.innerHTML='Point on three.<br><span class="markd">Tap the most.</span>';img.src='assets/'+(t<5.9?'point.png':'picked.png');}
+    else{const r=t<8.1?'drum.png':'reveal.png';img.src='assets/'+r;cap.innerHTML=WHO+' was…<br><span class="markd">THE IMPOSTER</span>';rot=t<8.1?Math.sin(t*50)*1.5:0;sc=t>=8.1?1+.06*(1-eo(seg(t,8.1,8.4))):1;}
+    const ci=t<7?seg(t,4.7,5.0):seg(t,7,7.3);set(cap,{op:ci,tf:`scale(${.8+.2*back(ci)})`});
+    set(ph,{top:y+'px',tf:`rotate(${rot}deg) scale(${sc})`,op:1-seg(t,9.4,9.6)});});
+  // caught / stole
+  const big=el(`<div class="abs t" style="top:640px;font-size:260px;color:${C.ink}"></div>`);
+  const small=el(`<div class="abs s" style="top:1000px;font-size:70px;color:${C.ink}"></div>`);
+  const dots=Array.from({length:40},(_,i)=>el(`<div class="abs dot" style="background:${[C.lime,'#fff',C.yellow,C.magenta,C.orange][i%5]}"></div>`));
+  const sC=shade('caught',300), sX=shade('excited',300);
+  U.push(t=>{const on=t>=9.6&&t<11.8;[big,small,...dots,sC,sX].forEach(e=>e.style.display=on?'':'none');if(!on)return;
+    const caught=t<10.8;big.textContent=caught?'Caught!':'Stole it.';small.textContent=caught?'Or the imposter guesses the word…':'…and steals the win.';
+    big.style.color=small.style.color=caught?C.ink:'#fff';
+    const q=caught?seg(t,9.6,9.9):seg(t,10.8,11.1);set(big,{tf:`rotate(-4deg) scale(${back(q)})`});set(small,{op:caught?seg(t,10.1,10.4):seg(t,11,11.3)});
+    dots.forEach((d,i)=>{const sx=(i*137)%1080,v=300+(i*53)%500;const tt=t-9.6;d.style.display=caught?'':'none';set(d,{left:sx+'px',top:(-80+v*tt*1.6+((i*71)%400))+'px',tf:`rotate(${tt*300+i*40}deg)`})});
+    sC.style.display=caught?'':'none';sX.style.display=caught?'none':'';set(caught?sC:sX,{left:'390px',top:(1250+Math.sin(t*8)*15)+'px',tf:`scale(${back(q)})`});});
+  U.push(endCard(11.8));
+}
+window.DUR=DUR;
+window.render=t=>{background(t);U.forEach(f=>f(t));};
+render(0);
+</script></body></html>

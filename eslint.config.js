@@ -32,13 +32,13 @@ const networkSyntax = ['downloadAsync', 'uploadAsync', 'createDownloadResumable'
 module.exports = defineConfig([
   expoConfig,
   {
-    ignores: ['dist/*', 'node_modules/*', '.expo/*'],
+    ignores: ['dist/*', 'node_modules/*', '.expo/*', 'scripts/store-art/.cache/**', 'scripts/store-art/out/**'],
   },
   {
     // Build-time scripts run under Node, not in the app bundle.
-    files: ['spec/**/*.js', '*.config.js'],
+    files: ['spec/**/*.js', 'scripts/**/*.js', '*.config.js'],
     languageOptions: {
-      globals: { __dirname: 'readonly', require: 'readonly', module: 'writable' },
+      globals: { __dirname: 'readonly', require: 'readonly', module: 'writable', process: 'readonly' },
     },
   },
   {

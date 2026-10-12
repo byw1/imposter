@@ -43,5 +43,19 @@ in the listing and submit for review when you're ready. Before launch, run a cle
 the name (see the design system's Legal guardrails): "imposter" is a common
 word in this category, so pair it with a distinctive subtitle and Shade.
 
+### The product page
+
+The listing (name, subtitle, promotional text, description, keywords, URLs,
+category and age rating) lives in [`store.config.json`](./store.config.json).
+Push it to App Store Connect instead of typing it in:
+
+```sh
+npx eas-cli@latest metadata:push
+```
+
+Screenshots aren't part of that file: `npm run store-art` renders them to
+`scripts/store-art/out/`. Upload the seven `appstore-*.png` under the 6.9"
+iPhone display; Apple scales them for smaller phones.
+
 Change `ios.bundleIdentifier` and `android.package` in `app.json` if you're
 shipping your own copy.

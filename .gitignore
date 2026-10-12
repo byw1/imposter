@@ -63,3 +63,7 @@ yarn-error.*
 credentials.json
 google-services.json
 GoogleService-Info.plist
+
+# Store art (scripts/store-art)
+scripts/store-art/.cache/
+scripts/store-art/out/

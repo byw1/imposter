@@ -1,0 +1,44 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:Brico;src:url(assets/Bricolage-800.ttf)}
+@font-face{font-family:Jak;src:url(assets/Jakarta-700Bold.ttf);font-weight:700}
+@font-face{font-family:Jak;src:url(assets/Jakarta-800ExtraBold.ttf);font-weight:800}
+*{margin:0;box-sizing:border-box}
+html,body{width:1320px;height:2868px;overflow:hidden}
+.slide{position:relative;width:1320px;height:2868px;overflow:hidden;background:var(--bg);color:var(--fg)}
+.bars{position:absolute;inset:0;opacity:.13}
+.bars i{position:absolute;height:44px;border-radius:22px;background:var(--bar)}
+.head{position:absolute;top:190px;left:90px;right:90px;text-align:center}
+h1{font-family:Brico;font-size:150px;line-height:1.02;letter-spacing:-5px}
+h1 mark{display:inline-block;background:#0C0A10;color:#C8FF2E;padding:0 28px 8px;border-radius:26px;transform:rotate(-3deg);margin-top:14px}
+.dark h1 mark{background:#C8FF2E;color:#0C0A10}
+p.sub{font-family:Jak;font-weight:700;font-size:54px;line-height:1.25;margin-top:34px;opacity:.85}
+.phone{position:absolute;left:50%;top:var(--pt,880px);width:930px;height:2016px;transform:translateX(-50%) rotate(var(--rot,0deg));border-radius:130px;background:#0b0b0d;padding:26px;box-shadow:0 60px 120px rgba(0,0,0,.35),0 0 0 6px rgba(255,255,255,.08) inset}
+.phone img{width:878px;height:1908px;border-radius:106px;display:block;object-fit:cover}
+.island{position:absolute;top:52px;left:50%;transform:translateX(-50%);width:250px;height:72px;border-radius:40px;background:#000}
+.shade{position:absolute;width:var(--sw,420px);transform:rotate(var(--sr,10deg));filter:drop-shadow(0 30px 40px rgba(0,0,0,.3))}
+.tag{position:absolute;font-family:Brico;font-size:70px;padding:12px 40px 22px;border-radius:28px;background:var(--tbg);color:var(--tfg);transform:rotate(var(--tr,-6deg));box-shadow:0 20px 40px rgba(0,0,0,.25)}
+</style></head><body><div id="root"></div>
+<script>
+const S=[
+ {bg:'#0C0A10',fg:'#fff',bar:'#fff',dark:1,h:'One of you is <mark>lying.</mark>',sub:'The party game of clues, bluffs and big reveals.',img:'home.png'},
+ {bg:'#00C2B2',fg:'#0C0A10',bar:'#0C0A10',h:'Everyone gets <mark>the word.</mark>',sub:'Pass the phone. Hold to peek. Don’t let anyone see.',img:'card-in.png',shade:{m:'peek',x:900,y:760,w:380,r:14}},
+ {bg:'#FF4560',fg:'#fff',bar:'#0C0A10',h:'Except the <mark>imposter.</mark>',sub:'They don’t know the word. They have to blend in.',img:'card-imposter.png',shade:{m:'smirk',x:40,y:2350,w:430,r:-12}},
+ {bg:'#FFE500',fg:'#0C0A10',bar:'#0C0A10',h:'One word each. <mark>Bluff.</mark>',sub:'Too obvious helps the imposter. Too vague looks suspicious.',img:'clues.png',tags:[{t:'cheesy?',x:70,y:1180,bg:'#9B5CFF',fg:'#fff',r:-8},{t:'slice!',x:930,y:1480,bg:'#0C0A10',fg:'#C8FF2E',r:7}]},
+ {bg:'#9B5CFF',fg:'#fff',bar:'#0C0A10',h:'3, 2, 1… <mark>point!</mark>',sub:'Everyone points at once. No changing your mind.',img:'point.png',shade:{m:'gasp',x:930,y:2300,w:380,r:12}},
+ {bg:'#E040FB',fg:'#fff',bar:'#0C0A10',h:'Caught? <mark>Steal the win.</mark>',sub:'A caught imposter gets one guess at the word.',img:'reveal.png'},
+ {bg:'#5B5BFF',fg:'#fff',bar:'#0C0A10',h:'No Wi‑Fi. No accounts. <mark>Just friends.</mark>',sub:'3 to 12 players. 600 words. Your own topics.',img:'topics.png',shade:{m:'wink',x:60,y:2330,w:400,r:-10}},
+];
+const n=+new URLSearchParams(location.search).get('n')||1; const s=S[n-1];
+let bars=''; let seed=n*97; const r=()=>{seed=(seed*9301+49297)%233280;return seed/233280};
+for(let y=40;y<2868;y+=88){let x=-60*r();while(x<1320){const w=120+r()*380;bars+=`<i style="top:${y}px;left:${x}px;width:${w}px"></i>`;x+=w+30+r()*40;}}
+const shade=s.shade?`<img class="shade" src="assets/shade-${s.shade.m}.svg" style="left:${s.shade.x}px;top:${s.shade.y}px;--sw:${s.shade.w}px;--sr:${s.shade.r}deg">`:'';
+const tags=(s.tags||[]).map(t=>`<div class="tag" style="left:${t.x}px;top:${t.y}px;--tbg:${t.bg};--tfg:${t.fg};--tr:${t.r}deg">${t.t}</div>`).join('');
+document.getElementById('root').innerHTML=`<div class="slide ${s.dark?'dark':''}" style="--bg:${s.bg};--fg:${s.fg};--bar:${s.bar}">
+<div class="bars">${bars}</div>
+<div class="head"><h1>${s.h}</h1><p class="sub">${s.sub}</p></div>
+<div class="phone" style="--pt:${s.pt||900}px"><img src="assets/${s.img}"><div class="island"></div></div>${tags}${shade}</div>`;
+
+const head=document.querySelector('.head'); const phoneTop=Math.round(head.getBoundingClientRect().bottom+80); const d=phoneTop-900;
+document.querySelector('.phone').style.setProperty('--pt',phoneTop+'px');
+document.querySelectorAll('.shade,.tag').forEach(e=>{e.style.top=(parseFloat(e.style.top)+d)+'px'});
+</script></body></html>
