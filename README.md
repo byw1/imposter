@@ -16,7 +16,7 @@
   <img alt="React Native 0.86" src="https://img.shields.io/badge/React%20Native-0.86-0C0A10?logo=react&logoColor=61DAFB">
   <img alt="TypeScript strict" src="https://img.shields.io/badge/TypeScript-strict-0C0A10?logo=typescript&logoColor=3178C6">
   <img alt="Network calls: 0" src="https://img.shields.io/badge/network%20calls-0-C8FF2E">
-  <img alt="Tests" src="https://img.shields.io/badge/tests-91-FFE500">
+  <img alt="Tests" src="https://img.shields.io/badge/tests-92-FFE500">
   <img alt="Licence AGPL-3.0" src="https://img.shields.io/badge/licence-AGPL--3.0-9B5CFF">
 </p>
 
@@ -41,7 +41,7 @@ I'd built [Charades](https://github.com/byw1/charades) and wanted a second
 game on the same bones: something you could start in two taps at a dinner
 table, a campsite or a basement with no signal. The rules I set:
 
-- **Two taps to play.** Type names once. After that it's one button.
+- **One tap to play.** Pick how many are playing and hit Start: no typing, you're Player 1, 2, 3. Add names whenever you like; they're saved for next time.
 - **The phone never gives the imposter away.** Every card looks, sounds and
   buzzes the same, in or imposter.
 - **No internet, ever.** No server, no account, no analytics, no ads.
@@ -78,7 +78,8 @@ table, a campsite or a basement with no signal. The rules I set:
 ## Features
 
 **🎭 Play**
-- 3 to 12 players. 1 to 3 imposters (it scales with the table), or a surprise.
+- 3 to 12 players. Start with numbered players in one tap, or type names once and they're saved.
+- 1 to 3 imposters (it scales with the table), or a surprise.
 - **Hint on or off**: imposters see the topic, or play fully blind.
 - One, two or three laps of clues. An optional talk timer.
 - **Point vote** (loud, fast) or **secret vote** (never for yourself; ties revote; a tied revote lets the imposters slip away).
